@@ -1,0 +1,13 @@
+name: 'read-n-write'
+
+services:
+  reader:
+    image: reader
+    build:
+      context: read-n-write
+      dockerfile: ./Dockerfile    
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
+    command: ["dist/apps/reader/main.js" ]

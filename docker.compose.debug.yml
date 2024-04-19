@@ -1,0 +1,18 @@
+name: 'read-n-write-debug'
+
+services:
+  reader:
+    image: reader-dev
+    build:
+      context: read-n-write
+      dockerfile: ./Dockerfile
+      target: development       
+    volumes:
+      - ./read-n-write:/home/node/app
+    environment:
+      NODE_ENV: development
+      DEBUG: '*'
+    ports:
+      - 3000:3000
+      - 9229:9229
+    command: ["/home/node/app/node_modules/.bin/nest", "build", "--webpack", "--webpackPath", "webpack-hmr.config.js", "--watch", "reader"]
