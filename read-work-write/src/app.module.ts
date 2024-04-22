@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppDefaultCommand } from './app.controller';
 import { CqrsModule } from '@nestjs/cqrs';
-import { _Template_Module } from './_template_/_template_.module';
+import { ReaderModule } from './reader/reader.module';
 
 @Module({
-  imports: [_Template_Module, CqrsModule.forRoot()],
+  imports: [ReaderModule, CqrsModule.forRoot()],
   providers: [AppDefaultCommand],
 })
 export class AppModule {}

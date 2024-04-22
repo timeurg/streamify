@@ -14,4 +14,4 @@ services:
       DEBUG: '*'
     ports:
       - 9229:9229
-    command: ["run", "start:debug", "--", "--", "-p parameter", "source", "target"]
+    command: ["run", "start:debug", "--", "--", "-p parameter1", "-p parameter2", "-w worker1", "-w worker2", "source", "target", "-w worker3"]

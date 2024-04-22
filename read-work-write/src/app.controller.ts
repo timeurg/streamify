@@ -1,11 +1,11 @@
 import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { RootCommand, CommandRunner, Option } from 'nest-commander';
-import { DummyEvent } from './_template_/domain/_template_.events';
-import { DummyCommand } from './_template_/application/commands';
+import { AppStartedEvent } from './common/events';
 
 
 interface AppDefaultCommandOptions {
   parameter?: string;
+  workload?: string[];
 }
 
 @RootCommand({ 
@@ -17,11 +17,12 @@ export class AppDefaultCommand extends CommandRunner {
     super();
   }
 
-  async run(passedParam: string[], options?: AppDefaultCommandOptions): Promise<void> {
+  async run(args: string[], options?: AppDefaultCommandOptions): Promise<void> {
+    console.log(JSON.stringify(process.env, undefined, 2))
     console.log(JSON.stringify(options, undefined, 2));
-    console.log(JSON.stringify(passedParam, undefined, 2));
-    this.eventBus.publish(new DummyEvent(passedParam, options));
-    this.commandBus.execute(new DummyCommand(passedParam, options));
+    console.log(JSON.stringify(args, undefined, 2));
+    const [input, output] = args;
+    this.eventBus.publish(new AppStartedEvent(input || '', output || '', options?.workload || [], options || {}));
   }
 
   @Option({
@@ -29,6 +30,15 @@ export class AppDefaultCommand extends CommandRunner {
     description: 'An arbitrary parameter'
   })
   parseString(val: string): string {
-    return val;
+    return val.trim();
+  }
+
+  @Option({
+    flags: '-w, --workload <options...>',
+    description: 'Specify workload',
+  })
+  parseOptions(option: string, optionsAccumulator: string[] = []): string[] {
+    optionsAccumulator.push(option.trim());
+    return optionsAccumulator;
   }
 }
