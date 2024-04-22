@@ -11,11 +11,11 @@ export class GetWorkerCommandHandler
   @Inject() private readonly factory: WorkerFactory;
 
   async execute(command: GetWorkerCommand): Promise<void> {
-    
+    console.log(GetWorkerCommandHandler.name, command)
     let options: CreateWorkerOptions = {
       ...command,
     }
     const worker = this.factory.create(options);
-    console.log('GetWorkerCommand', command)
+    worker.connect();
   }
 }
