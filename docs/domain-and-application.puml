@@ -1,0 +1,57 @@
+@startuml Basic Use Case
+participant "Reader<Application>"
+box "Worker"
+participant "Worker<Domain>"
+participant "Worker<Application>"
+end box
+box "DataBus"
+participant "DataBus<Domain>"
+participant "DataBus<Application>"
+end box
+
+"Reader<Application>" <-- "Reader<Application>": AppStartEvent
+"Reader<Application>" -> "Worker<Application>": GetWorkerQuery
+"Worker<Application>" -> "Worker<Domain>": WorkerFactory:create
+group WorkerFactory:create
+"Worker<Domain>" -> "DataBus<Domain>": Worker.input = DataBusFactory:create
+"Worker<Domain>" -> "DataBus<Domain>": Worker.output = DataBusFactory:create
+    loop 
+    "Worker<Domain>" -> "WorkLoad<Domain>": Worker.workload[]: stream.Transform[] = WorkLoadFactory:create
+    end
+end
+"DataBus<Domain>" --> "Worker<Application>": DataBusReadyEvent(input) + DataBusReadyEvent(output) = WorkerReadyEvent
+"Worker<Application>" --> "Reader<Application>": WorkerReadyEvent
+"Worker<Application>" <- "Reader<Application>": WorkerStartCommand
+group WorkerStartCommandHandler
+"Worker<Application>" -> "Worker<Domain>": Worker.start
+"Worker<Domain>" -> "DataBus<Domain>": (input, output)<DataBus>.getStream 
+"Worker<Domain>" -> "Worker<Domain>": input[.pipe(...workload)].pipe(output)
+end
+"Worker<Domain>" --> "Worker<Domain>": input.end + output.end = WorkerFinishedEvent
+"Worker<Domain>" --> "Reader<Application>": WorkerFinishedEvent
+
+alt Limit throughput by using Readable.pause
+    "DataBus<Domain>" --> "DataBus<Application>": DataBusBusyEvent
+    group DataBusBusyEventHandler
+    "Worker<Application>" <-- "DataBus<Application>": DataBusBusyEvent
+    "Worker<Application>" -> "Worker<Domain>": Worker.input.getStream().pause()
+    end
+    "DataBus<Domain>" --> "DataBus<Application>": DataBusIdleEvent
+    group DataBusIdleEventHandler
+    "Worker<Application>" <-- "DataBus<Application>": DataBusIdleEvent
+    "Worker<Application>" -> "Worker<Domain>": Worker.input.getStream().unpause()
+    end
+else Limit throughput by using Writable.cork
+    "DataBus<Domain>" --> "DataBus<Application>": DataBusBusyEvent
+    group DataBusBusyEventHandler
+    "Worker<Application>" <-- "DataBus<Application>": DataBusBusyEvent
+    "Worker<Application>" -> "Worker<Domain>": Worker.output.getStream().cork()
+    end
+    "DataBus<Domain>" --> "DataBus<Application>": DataBusIdleEvent
+    group DataBusIdleEventHandler
+    "Worker<Application>" <-- "DataBus<Application>": DataBusIdleEvent
+    "Worker<Application>" -> "Worker<Domain>": Worker.output.getStream().uncork()
+    end
+end
+
+@enduml

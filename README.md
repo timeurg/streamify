@@ -25,7 +25,16 @@ const processData = (data) => {
 1. Реализовать поддержку различных видов транспорта (например websockets). Возможно, дополнительно поддержать обработку различных видов данных.
 2. Покрыть тестами.
 
+# Реализация:
+
+[Программирование "на листочке"](./docs/DESIGN_PROPOSAL.md)
+
 # Scripts
 
-- `cd reader && npm run start:dev -- -- [-p param] [source] <target>`
-- `docker compose -f "docker.compose.debug.yml" up -d --build`
+- `docker compose -f "docker.compose.yml" up -d --build`
+- `docker run --rm reader `
+
+## Debug
+
+- local `cd reader && npm run start:dev -- -- [-p param] [source] <target>`
+- docker `docker compose -f "docker.compose.debug.yml" up -d --build`
