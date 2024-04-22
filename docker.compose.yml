@@ -4,8 +4,8 @@ services:
   reader:
     image: reader
     build:
-      context: reader
+      context: read-work-write
       dockerfile: ./Dockerfile    
     environment:
       NODE_ENV: production
-    command: ["dist/main.js", "-p parameter", "source", "target"]
+    command: ["-p parameter", "source", "target"]

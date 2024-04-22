@@ -4,14 +4,14 @@ services:
   reader:
     image: reader-dev
     build:
-      context: reader
+      context: read-work-write
       dockerfile: ./Dockerfile
       target: development       
     volumes:
-      - ./reader:/home/node/app
+      - ./read-work-write:/home/node/app
     environment:
       NODE_ENV: development
       DEBUG: '*'
     ports:
       - 9229:9229
-    command: ["node", "/home/node/app/node_modules/.bin/nest", "start", "--debug 0.0.0.0:9229", "--watch", "--", "-p parameter", "source", "target"]
+    command: ["run", "start:debug", "--", "--", "-p parameter", "source", "target"]
