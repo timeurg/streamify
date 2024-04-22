@@ -9,9 +9,10 @@ services:
       target: development       
     volumes:
       - ./read-work-write:/home/node/app
+      - ./temp:/home/node/temp
     environment:
       NODE_ENV: development
       DEBUG: '*'
     ports:
       - 9229:9229
-    command: ["run", "start:debug", "--", "--", "-p parameter1", "-p parameter2", "-w worker1", "-w worker2", "source", "target", "-w worker3"]
+    command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "../temp/copy.txt"]

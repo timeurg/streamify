@@ -11,8 +11,8 @@ export class WorkerSagas {
     return events$.pipe(
       ofType(WorkerConnectStarted),
       mergeMap((event) => [
-        new GetDataBusCommand("input", { connectionString: event.input } ),
-        new GetDataBusCommand("output", { connectionString: event.output } ),
+        new GetDataBusCommand({ connectionString: event.input, mode: "input" } ),
+        new GetDataBusCommand({ connectionString: event.output, mode: "output" } ),
       ]),
     );
   }

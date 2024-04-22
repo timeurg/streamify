@@ -1,9 +1,16 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 import { Readable, Writable } from 'stream';
 
+export interface DataBusTypeMap {
+  "input": Readable;
+  "output": Writable;
+}
+export type DataBusType = keyof DataBusTypeMap;
+
 export type DataBusEssentialProperties = Readonly<
   Required<{
-    connectionString: string;
+    connectionString: DataBusType;
+    mode: DataBusType;
   }>
 >;
 
@@ -15,27 +22,27 @@ export type DataBusOptionalProperties = Readonly<
 export type DataBusProperties = DataBusEssentialProperties &
   Required<DataBusOptionalProperties>;
 
-export interface DataBusTypeMap {
-  "input": Readable;
-  "output": Writable;
+// looks good, doesn't work
+export type DataBusStreamMode<U, T extends keyof U> = {
+  mode: T;
+  getStream(): U[T];
 }
 
-export type DataBusType = keyof DataBusTypeMap;
-
-export interface DataBus {
-  connect: (purpose: DataBusType) => Promise<void>;
-  getStream: <T extends DataBusType>(type: T) => DataBusTypeMap[T];
+export interface DataBusInterface {
+  connect: () => Promise<void>;
 }
 
-export abstract class DataBusImplement extends AggregateRoot implements DataBus {
+export abstract class DataBus extends AggregateRoot implements DataBusInterface, DataBusStreamMode<DataBusTypeMap,DataBusType> {
   protected connectionString: string;
+  public readonly mode: DataBusType;
 
   constructor(properties: DataBusProperties) {
     super();
     Object.assign(this, properties);
+    this.autoCommit = true;
   };
 
-  abstract getStream<T extends DataBusType>(type: T): DataBusTypeMap[T];
+  abstract getStream(): Readable | Writable;
 
-  abstract connect(purpose: DataBusType): Promise<void>;
+  abstract connect(): Promise<void>;
 }

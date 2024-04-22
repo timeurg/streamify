@@ -13,7 +13,7 @@ export class GetDataBusCommandHandler
 
   async execute(command: GetDataBusCommand): Promise<void> {
     const bus = this.factory.create(command.options);
-    bus.connect(command.purpose);
+    bus.connect();
     console.log('GetDataBusCommandHandler', command)
   }
 }

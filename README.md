@@ -33,6 +33,7 @@ const processData = (data) => {
 
 - `docker compose -f "docker.compose.yml" up -d --build`
 - `docker run --rm reader `
+- create big file: `head -c 50M /dev/urandom > temp/sample.txt`
 
 ## Debug
 
@@ -42,4 +43,5 @@ const processData = (data) => {
 ## ToDo
 
 - error handling
+- proper logging
 - offset support
