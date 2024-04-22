@@ -38,3 +38,8 @@ const processData = (data) => {
 
 - local `cd reader && npm run start:dev -- -- [-p param] [source] <target>`
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
+
+## ToDo
+
+- error handling
+- offset support

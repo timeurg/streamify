@@ -15,7 +15,7 @@ export type DataBusOptionalProperties = Readonly<
 export type DataBusProperties = DataBusEssentialProperties &
   Required<DataBusOptionalProperties>;
 
-interface DataBusTypeMap {
+export interface DataBusTypeMap {
   "input": Readable;
   "output": Writable;
 }
@@ -27,15 +27,15 @@ export interface DataBus {
   getStream: <T extends DataBusType>(type: T) => DataBusTypeMap[T];
 }
 
-export class DataBusImplement extends AggregateRoot implements DataBus {
+export abstract class DataBusImplement extends AggregateRoot implements DataBus {
+  protected connectionString: string;
 
   constructor(properties: DataBusProperties) {
     super();
     Object.assign(this, properties);
-  }
-
-  getStream: <T extends DataBusType>(type: T) => DataBusTypeMap[T];
-
-  async connect(): Promise<void> {
   };
+
+  abstract getStream<T extends DataBusType>(type: T): DataBusTypeMap[T];
+
+  abstract connect(purpose: DataBusType): Promise<void>;
 }

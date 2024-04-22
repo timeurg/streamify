@@ -1,16 +1,22 @@
 import { parseConnectionString } from "src/common/helpers/connection-string";
-import { DataBus } from "../domain/databus";
+import { DataBus, DataBusImplement, DataBusProperties } from "../domain/databus";
 import { CreateDataBusOptions, DataBusFactory } from "../domain/databus.factory";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import * as util from 'node:util';
 import { DataBusErrors } from "../errors";
-import { EventPublisher } from "@nestjs/cqrs";
+import { AggregateRoot, EventPublisher } from "@nestjs/cqrs";
 import { StdDataBus } from "./protocols/std.databus";
+import { FileDataBus } from "./protocols/file.databus";
+
+type DataBusImplementType = {
+    new <T extends DataBusImplement>(properties: DataBusProperties): T
+}
 
 @Injectable()
 export class DataBusFactoryImplement implements DataBusFactory {
-    private readonly classMap = {
+    private readonly classMap: {[key: string]: {new (properties: DataBusProperties)}} = {
         'std': StdDataBus,
+        'file': FileDataBus,
     }
     
     @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
@@ -22,7 +28,7 @@ export class DataBusFactoryImplement implements DataBusFactory {
         }
 
         return this.eventPublisher.mergeObjectContext(
-            new this.classMap[protocol](connectionOptions)
+            new (this.classMap[protocol] as DataBusImplementType)({ connectionString: connectionOptions })
         );
     }
 

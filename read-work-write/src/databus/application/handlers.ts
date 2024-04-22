@@ -14,6 +14,6 @@ export class GetDataBusCommandHandler
   async execute(command: GetDataBusCommand): Promise<void> {
     const bus = this.factory.create(command.options);
     bus.connect(command.purpose);
-    console.log('GetDataBusCommandHandler')
+    console.log('GetDataBusCommandHandler', command)
   }
 }
