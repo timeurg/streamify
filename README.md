@@ -29,6 +29,14 @@ const processData = (data) => {
 
 [Программирование "на листочке"](./docs/DESIGN_PROPOSAL.md)
 
+CLI приложение со следующим синтаксом:
+
+`<run> [[-w worker]] <source> [target]`
+
+- `<run>` команда на запуск приложения, например `node dist/main` или `docker run --rm reader`
+- `-w --worker` потоковый обработчик передаваемых данных, можно передать несколько, порядок имеет значение
+- аргументы `<source> [target]` - источник и назначение данных. Если указано одно значение оно считаетается источником. Значения имеют вид `ПРОТОКОЛ:НАСТРОЙКИ`, если не указан протокол, но значение не пустое используется протокол `file`, если значение пустое - `std` (stdin для источника, stdout для назначения)
+
 # Scripts
 
 - `docker compose -f "docker.compose.yml" up -d --build`
@@ -41,7 +49,7 @@ const processData = (data) => {
 
 ## Debug
 
-- local `cd read-work-write && npm run start:dev -- -- [-p param] [source] <target>`
+- local `cd read-work-write && npm run start:dev -- -- [[-w worker]] <source> [target]`
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
 
 ## ToDo

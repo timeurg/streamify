@@ -11,3 +11,6 @@ services:
     command: ["-p parameter", "source", "target"]
   nats:
     image: nats:2.10.14-alpine3.19 # https://github.com/nats-io/nats-docker/blob/main/2.10.x/alpine3.19/
+    ports:
+      - 8222:8222
+      - 4222:4222
