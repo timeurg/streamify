@@ -9,7 +9,8 @@ import { DataBusFactory } from '../domain/databus.factory';
 export class GetDataBusCommandHandler
   implements ICommandHandler<GetDataBusCommand, void>
 {
-  @Inject(InjectionToken.DataBus_FACTORY) private factory: DataBusFactory;
+  @Inject() private factory: DataBusFactory;
+  // @Inject(InjectionToken.DataBus_FACTORY) private factory: DataBusFactory;
 
   async execute(command: GetDataBusCommand): Promise<void> {
     const bus = this.factory.create(command.options);
@@ -22,8 +23,6 @@ export class GetDataBusCommandHandler
 export class GetDataBusStreamCommandHandler
   implements ICommandHandler<GetDataBusStreamCommand, void>
 {
-  @Inject(InjectionToken.DataBus_FACTORY) private factory: DataBusFactory;
-
   async execute(command: GetDataBusStreamCommand): Promise<void> {
     command.bus.getStream();
   }

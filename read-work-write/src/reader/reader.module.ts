@@ -1,5 +1,4 @@
 import { Module, Provider } from '@nestjs/common';
-import * as handlers from './application/handlers';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ReaderSagas } from './application/reader.saga';
 import { ReaderFactory } from './domain/reader.factory';
@@ -11,7 +10,6 @@ const infrastructure: Provider[] = [
 ];
 
 const application = [
-  ...Object.values(handlers),
   ReaderSagas
 ];
 

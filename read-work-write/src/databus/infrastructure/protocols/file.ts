@@ -4,33 +4,33 @@ import { dirname } from 'node:path'
 import { OnModuleDestroy } from "@nestjs/common";
 import { Readable, Writable } from "node:stream";
 import { DataBusConnectStartEvent, DataBusConnectSuccessEvent, DataBusStreamCreatedEvent } from "src/databus/domain/databus.events";
+import { ProtocolAdaptor } from "src/databus/domain/protocol";
 
-export class FileDataBus extends DataBus implements OnModuleDestroy, DataBusStreamMode<DataBusTypeMap,DataBusType>  {
+export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor  {
     private fileHandle: fs.FileHandle;
     private stream: Readable | Writable;
+    constructor(private connectionString: string) {
+    };
 
-    async connect(): Promise<void> {
-        this.apply(new DataBusConnectStartEvent(this));
-        switch (this.mode) {
+    async connect(mode: keyof DataBusTypeMap): Promise<void> {
+        switch (mode) {
             case "input":
                 this.fileHandle = await fs.open(this.connectionString, 'r');
-                this.apply(new DataBusConnectSuccessEvent(this));
                 return;
             case "output":
                 this.fileHandle = await fs.open(this.connectionString, 'w');
-                this.apply(new DataBusConnectSuccessEvent(this));
                 return;
             default:
                 break;
         }
-        throw new Error("FileDataBus connect failed.");
+        throw new Error("FileProtocolAdaptor: file open failed.");
     }
 
-    getStream(): Readable | Writable {
+    getStream(mode: keyof DataBusTypeMap): Readable | Writable {
         if (!this.fileHandle) {
-            throw new Error("FileDataBus getting stream before connect.");
+            throw new Error("FileProtocolAdaptor: getting stream before connect.");
         }
-        switch (this.mode) {
+        switch (mode) {
             case "input":
                 this.stream = this.fileHandle.createReadStream();
                 break;
@@ -40,13 +40,11 @@ export class FileDataBus extends DataBus implements OnModuleDestroy, DataBusStre
             default:
                 throw new Error("FileDataBus unknown mode");
         }
-        this.apply(new DataBusStreamCreatedEvent(this, this.stream))
         return this.stream;
     }
 
 
     onModuleDestroy() {
-        console.log(FileDataBus.name, 'destroy')
         if (this.fileHandle) {
             this.fileHandle.close()
         }

@@ -1,17 +1,19 @@
 import { Module, Provider } from '@nestjs/common';
-import * as handlers from './application/handlers';
 import { CqrsModule } from '@nestjs/cqrs';
 import { WorkerSagas } from './application/worker.saga';
 import { WorkerFactory } from './domain/worker.factory';
 import { WorkerDomainService } from './domain/worker.service';
 import { DataBusModule } from 'src/databus/databus.module';
+import { AssignStreamCommandHandler, GetWorkerCommandHandler, StartTransferCommandHandler } from './application/handlers';
 
 const infrastructure: Provider[] = [
 
 ];
 
 const application = [
-  ...Object.values(handlers),
+  GetWorkerCommandHandler,
+  AssignStreamCommandHandler,
+  StartTransferCommandHandler,
   WorkerSagas
 ];
 

@@ -5,6 +5,7 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
   const app = await CommandFactory.runWithoutClosing(
     AppModule, 
+    new Logger('main')
   );
 }
 
