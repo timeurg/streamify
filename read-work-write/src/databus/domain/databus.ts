@@ -40,15 +40,14 @@ export interface DataBusInterface {
 export class DataBus extends AggregateRoot implements DataBusInterface, DataBusStreamMode<DataBusTypeMap,DataBusType> {
   protected connectionString: string;
   public readonly mode: DataBusType;
-  @Inject(InjectionToken.ProtocolAdaptor_FACTORY) private transportFactory: ProtocolAdaptorFactory;
-  private transport: ProtocolAdaptor;
   private stream: Readable | Writable;
 
-  constructor(properties: DataBusProperties) {
+  constructor(
+    properties: DataBusProperties, 
+    private transport: ProtocolAdaptor
+  ) {
     super();
-    // console.log('this.transportFactory', this.transportFactory)
     Object.assign(this, properties);
-    // console.log('this.connectionString', this.transportFactory)
   };
 
   getStream(): Readable | Writable {
@@ -58,7 +57,6 @@ export class DataBus extends AggregateRoot implements DataBusInterface, DataBusS
   };
 
   async connect(): Promise<void> {
-    this.transport = this.transportFactory.create(this.connectionString);
     this.autoCommit = true;
     this.apply(new DataBusConnectStartEvent(this));
     await this.transport.connect(this.mode);
