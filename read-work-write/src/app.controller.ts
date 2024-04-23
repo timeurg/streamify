@@ -18,9 +18,6 @@ export class AppDefaultCommand extends CommandRunner {
   }
 
   async run(args: string[], options?: AppDefaultCommandOptions): Promise<void> {
-    console.log(JSON.stringify(process.env, undefined, 2))
-    console.log(JSON.stringify(options, undefined, 2));
-    console.log(JSON.stringify(args, undefined, 2));
     const [input, output] = args;
     this.eventBus.publish(new AppStartedEvent(input || '', output || '', options?.workload || [], options || {}));
   }

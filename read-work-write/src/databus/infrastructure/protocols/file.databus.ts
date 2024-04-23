@@ -3,18 +3,22 @@ import { constants, promises as fs} from 'node:fs';
 import { dirname } from 'node:path'
 import { OnModuleDestroy } from "@nestjs/common";
 import { Readable, Writable } from "node:stream";
+import { DataBusConnectStartEvent, DataBusConnectSuccessEvent, DataBusStreamCreatedEvent } from "src/databus/domain/databus.events";
 
 export class FileDataBus extends DataBus implements OnModuleDestroy, DataBusStreamMode<DataBusTypeMap,DataBusType>  {
     private fileHandle: fs.FileHandle;
     private stream: Readable | Writable;
 
     async connect(): Promise<void> {
+        this.apply(new DataBusConnectStartEvent(this));
         switch (this.mode) {
             case "input":
                 this.fileHandle = await fs.open(this.connectionString, 'r');
+                this.apply(new DataBusConnectSuccessEvent(this));
                 return;
             case "output":
                 this.fileHandle = await fs.open(this.connectionString, 'w');
+                this.apply(new DataBusConnectSuccessEvent(this));
                 return;
             default:
                 break;
@@ -36,6 +40,7 @@ export class FileDataBus extends DataBus implements OnModuleDestroy, DataBusStre
             default:
                 throw new Error("FileDataBus unknown mode");
         }
+        this.apply(new DataBusStreamCreatedEvent(this, this.stream))
         return this.stream;
     }
 

@@ -16,7 +16,16 @@ export type CreateWorkerOptions = Readonly<{
 export class WorkerFactory {
   @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
 
-  create(options: CreateWorkerOptions): Worker {  
+  private instance: Worker;
+
+  get(options?: CreateWorkerOptions): Worker {
+    if (!this.instance) {
+      this.instance = this.create(options);
+    }
+    return this.instance;
+  }
+
+  private create(options: CreateWorkerOptions): Worker {  
     return this.eventPublisher.mergeObjectContext(
       new WorkerImplement({
         ...options
@@ -24,7 +33,7 @@ export class WorkerFactory {
     );
   }
 
-  reconstitute(properties: WorkerProperties): Worker {
+  private reconstitute(properties: WorkerProperties): Worker {
     return this.eventPublisher.mergeObjectContext(
       new WorkerImplement(properties),
     );

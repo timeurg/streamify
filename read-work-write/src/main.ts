@@ -10,4 +10,4 @@ async function bootstrap() {
 }
 
 bootstrap();
-process.on('exit',() => console.log('exit', new Date()))
+process.on('exit',() => console.log('exited', new Date()))
