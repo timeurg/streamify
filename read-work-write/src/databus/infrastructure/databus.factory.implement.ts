@@ -22,7 +22,7 @@ export class DataBusFactoryImplement implements DataBusFactory {
     @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
 
     create(options: CreateDataBusOptions): DataBus {
-        const {protocol, connectionOptions} = parseConnectionString(options.connectionString);
+        let {protocol, connectionOptions} = parseConnectionString(options.connectionString);
         if (!this.classMap[protocol]) {
             throw new BadRequestException(util.format(DataBusErrors.UNKNOWN_PROTOCOL, protocol))
         }

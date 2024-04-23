@@ -33,11 +33,13 @@ const processData = (data) => {
 
 - `docker compose -f "docker.compose.yml" up -d --build`
 - `docker run --rm reader `
-- create big file: `head -c 50M /dev/urandom > temp/sample.txt`
+- аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
+- аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
+- создать большой файл для теста: `head -c 50M /dev/urandom > temp/sample.txt` или `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 50M > sample.txt` для читабельности
 
 ## Debug
 
-- local `cd reader && npm run start:dev -- -- [-p param] [source] <target>`
+- local `cd read-work-write && npm run start:dev -- -- [-p param] [source] <target>`
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
 
 ## ToDo
