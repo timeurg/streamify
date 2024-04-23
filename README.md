@@ -35,6 +35,8 @@ const processData = (data) => {
 - `docker run --rm reader `
 - аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
 - аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
+- аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
+ std ../temp/doc2`
 - создать большой файл для теста: `head -c 50M /dev/urandom > temp/sample.txt` или `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 50M > sample.txt` для читабельности
 
 ## Debug

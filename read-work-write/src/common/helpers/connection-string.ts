@@ -5,7 +5,7 @@ export function parseConnectionString(input: string) : {
     let [protocol, ...rest] = input.split(':');
     let connectionOptions: string;
     
-    if (!protocol) {
+    if (!protocol || protocol == 'std') {
         protocol = 'std';
     } else if (rest.length === 0) {
         connectionOptions = protocol;
