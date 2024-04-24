@@ -3,6 +3,7 @@ import * as compose from 'docker-compose'
 
 const cwd = path.join(__dirname);
 
+// https://pdmlab.github.io/docker-compose/api.html
 export const getNatsPort = async () => {
     const composeUp = await compose.upAll({
         cwd,
