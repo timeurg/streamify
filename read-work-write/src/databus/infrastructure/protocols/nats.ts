@@ -56,10 +56,8 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
             throw new Error(util.format(DataBusErrors.PROTOCOL_PREMATURE_GETSTREAM, this.constructor.name))
         }
         if (mode == 'input') {
-            console.log(mode)
             this.stream = new NatsReadableStream({}, this.connection, this.config.subject);
         } else {
-            console.log(mode)
             this.stream = new NatsWritableStream({}, this.connection, this.config.subject);
         }
         return this.stream;

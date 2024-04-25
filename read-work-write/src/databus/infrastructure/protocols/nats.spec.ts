@@ -8,20 +8,17 @@ import { Empty, JSONCodec, NatsConnection, StringCodec, connect, headers } from 
 import { Subject, firstValueFrom, takeUntil, timeout } from "rxjs";
 import { Readable, Writable } from "node:stream";
 import * as crypto from 'node:crypto';
+import { getConfig, natsHelloWorld, natsTestRequest, natsTestSubscribe } from "./nats/test-helpers";
 
 let options, config = '', subject = 'test' + new Date().getTime(), 
     testClient: NatsConnection, sc = StringCodec(), jc = JSONCodec(), exit$ = new Subject<void>(); 
 describe('NatsProtocolAdaptor', () => {
     beforeAll(async () => {
         const port = await getNatsPort();
-        config = path.join(os.tmpdir(),'nats_adapter_config' + new Date().getTime());
         options = {
             port
         }
-        await fs.writeFile(config, JSON.stringify({
-          connection: options,
-          subject,
-        }))
+        config = await getConfig(options, subject)
     });
     afterAll(async () => {
       exit$.next();
@@ -32,25 +29,8 @@ describe('NatsProtocolAdaptor', () => {
     })
     describe('testbed', () => {
       it('should have a NATS server for testing', async () => {
-        //!sic can't call connect(options), as connect mutates options
-        //resulting in "NatsError: port and servers options are mutually exclusive" on next call
-        testClient = await connect({...options}) 
-        
-        const sub = testClient.subscribe("hello");
-        let result;
-        (async () => {
-          for await (const m of sub) {
-            result = m.data;
-          }
-        })();
-        testClient.publish("hello", "world");
-        
-        await testClient.drain();
-        const err = await testClient.closed();
-        if (err) {
-          console.log(err)
-        }
-        expect(sc.decode(result)).toEqual("world");
+        const result = await natsHelloWorld(options)
+        expect(result).toEqual("world");
       });
     });
     describe('input mode', () => {
@@ -89,24 +69,7 @@ describe('NatsProtocolAdaptor', () => {
           const expectation = 'adapter makes requests and expects replies';
           const data = 'Hello world';
 
-          // 
-          testClient = await connect({...options});
-          const subscription = testClient.subscribe(subject);
-          const transactions = {};
-          (async (sub) => {
-            for await (const m of sub) {
-              let transactionId;
-              if (m.headers) {
-                transactionId = m.headers.get("transactionId");
-                transactions[transactionId] = transactions[transactionId] || data.split('');
-              }
-              if (m.respond(sc.encode(transactionId ? transactions[transactionId].splice(0, 1) : data))) {
-                expect(expectation).toBeTruthy();
-              } else {
-                expect(expectation).toBeFalsy();
-              }
-            }
-          })(subscription);
+          const { testClient } = await natsTestSubscribe(options, subject, data);
 
           const stream = protocol.getStream('input');
           let result = '';
@@ -116,7 +79,7 @@ describe('NatsProtocolAdaptor', () => {
           await testClient.drain();
           await testClient.close();
           expect(result).toEqual(data)
-        }, 10000);
+        });
       });
     });
     describe('output mode', () => {
@@ -159,23 +122,8 @@ describe('NatsProtocolAdaptor', () => {
 
           stream.write(input);
           
-          testClient = await connect({...options});
-          const timeout = 1000, header = headers();
-          header.append("transactionId", crypto.randomUUID());
-          let output;
-          await testClient.request(
-              subject, 
-              Empty, 
-              { noMux: true, timeout, headers: header }
-          ).then((m) => {
-            output = sc.decode(m.data);
-            expect(expectation).toBeTruthy();
-          }).catch(e => {
-            console.log('TestClient request fail', e);
-            expect(expectation).toBeFalsy();
-          });
-          await testClient.drain();
-          await testClient.close();
+          const output = await natsTestRequest(options, subject);
+          
           expect(input).toEqual(output)
         }, 10000);
       });

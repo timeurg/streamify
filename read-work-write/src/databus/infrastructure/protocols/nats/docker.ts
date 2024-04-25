@@ -7,7 +7,7 @@ const cwd = path.join(__dirname);
 export const getNatsPort = async () => {
     const composeUp = await compose.upAll({
         cwd,
-        log: true,
+        log: false,
     });
     const result = await compose.ps({ 
         cwd, 
