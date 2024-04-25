@@ -12,7 +12,21 @@ services:
       - ./temp:/home/node/temp
     environment:
       NODE_ENV: development
-      DEBUG: '*'
-    ports:
-      - 9229:9229
-    command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "../temp/copy.txt"]
+      DEBUG: '*'   
+    network_mode: host
+    # command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "../temp/copy.txt"]
+    command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "nats:4222/file-transfer"]
+  writer:
+    image: writer-dev
+    build:
+      context: read-work-write
+      dockerfile: ./Dockerfile
+      target: development       
+    volumes:
+      - ./read-work-write:/home/node/app
+      - ./temp:/home/node/temp
+    environment:
+      NODE_ENV: development
+      DEBUG: '*' 
+    network_mode: host
+    command: ["run", "start:dev", "--", "--", "nats:4222/file-transfer", "../temp/copy-over-nats.txt"]

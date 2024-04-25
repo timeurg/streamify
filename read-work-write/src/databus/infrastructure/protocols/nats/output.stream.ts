@@ -1,6 +1,8 @@
 import { Empty, ErrorCode, MsgHdrs, NatsConnection, StringCodec, Subscription, headers } from "nats";
-import { WritableOptions, Writable } from 'node:stream';
+import { config } from "node:process";
+import { WritableOptions, Writable, getDefaultHighWaterMark } from 'node:stream';
 import { BehaviorSubject, Subject, lastValueFrom } from "rxjs";
+import { runTimeConfiguration } from "src/config";
 
 const sc = StringCodec();
 
@@ -18,7 +20,10 @@ export class NatsWritableStream extends Writable {
   
 
   constructor(options: WritableOptions, private connection: NatsConnection, private subject: string) {
-    super(options);
+    console.log(`Higwatermark at ${runTimeConfiguration.NatsOutputHighWaterMark}`)
+    super(Object.assign(options, {
+      highWaterMark: runTimeConfiguration.NatsOutputHighWaterMark,
+    }));
     this.subscription = this.connection.subscribe(this.subject);
   }
 
@@ -31,11 +36,12 @@ export class NatsWritableStream extends Writable {
       for await (const m of sub) {
         if (m.headers) {
           const transactionId = m.headers.get("transactionId");
-          // new transaction
-          if (!this.transactionId) {
-            this.transactionId = transactionId;
-          }
           const batchCount = Number.parseInt(m.headers.get("batchCount"));
+          // new transaction
+          if (!this.transactionId && batchCount == 0) {
+            this.transactionId = transactionId;
+            console.log(`Transaction ${this.transactionId} started`);
+          }
           // we respond only to current batchCount queries
           // batchCount increase in request means 
           // previous batch was succesfully processed, so we call saved write callback
@@ -45,6 +51,7 @@ export class NatsWritableStream extends Writable {
               const chunk = this.currentChunk.getValue();
               if (chunk) {
                 m.respond(chunk instanceof Uint8Array ? chunk : sc.encode(chunk));
+                console.log(`Batch ${this.batchCount} sent`);
                 if (chunk.length == 0) {
                   this.callback(); //end of transfer
                 }
@@ -53,6 +60,8 @@ export class NatsWritableStream extends Writable {
               //next request, call write callback and clear pending data to enable subsequent writes
               this.batchCount++;
               this.callback();
+            } else {
+              console.log(`Client asks for batch ${batchCount}, we're at ${this.batchCount}`);
             }
           }
         }
@@ -73,16 +82,26 @@ export class NatsWritableStream extends Writable {
    * If a stream implementation is capable of processing multiple chunks of data at once, 
    * the writable._writev() method should be implemented.
    */
+  private last = 0;
   _write(chunk, encoding, callback) {
+    if (chunk.length > this.last) {
+      console.log('Queued', chunk.length / 1024, 'Kb', this.transactionId ? `for ${this.transactionId} batch number ${this.batchCount}` : '' )
+      this.last = chunk.length;
+    }
     this.subLoop();
     this.currentCallback.next(callback);
     this.currentChunk.next(chunk);
   }
 
-  // _writev(chunks, callback) {
-  //   // ...
-  // }
+  _writev(chunks, callback) {
+    console.log('Queued', (chunks.length * 65536 / 1024 / 1024), 'Mb', 'batch', this.batchCount);
+    this.subLoop();
+    this.currentCallback.next(callback);
+    this.currentChunk.next(chunks.map(c => c.chunk).join(''));
+  }
+
   _final(callback: (error?: Error) => void): void {
+    console.log(`Transaction ${this.transactionId} ended`);
     this.callback();
     this.currentCallback.complete();
     this.currentChunk.complete();

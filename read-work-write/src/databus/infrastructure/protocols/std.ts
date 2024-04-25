@@ -1,6 +1,6 @@
 import { Readable, Writable } from "node:stream";
-import { DataBus, DataBusTypeMap } from "src/databus/domain/databus";
-import { DataBusConnectSuccessEvent, DataBusStreamCreatedEvent } from "src/databus/domain/databus.events";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { DataBusTypeMap } from "src/databus/domain/databus";
 import { ProtocolAdaptor } from "src/databus/domain/protocol";
 
 export class StdProtocolAdaptor implements ProtocolAdaptor {
@@ -17,4 +17,12 @@ export class StdProtocolAdaptor implements ProtocolAdaptor {
     }
     private stream: Readable | Writable;
 
+    disconnect(): Promise<void> {
+        return;
+    }
+    
+    private state$: Subject<'BUSY'|'READY'> = new BehaviorSubject('READY');
+    state(): Observable<"BUSY" | "READY"> {
+        return this.state$.asObservable();
+    }
 }

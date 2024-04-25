@@ -44,6 +44,7 @@ export class NatsReadableStream extends Readable {
                 data = m.data;
             });
             if (data.length == 0) {
+              console.log('End of transfer')
                 data = null;
             }
             ready = this.push(data);

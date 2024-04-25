@@ -73,6 +73,9 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
+    "modulePaths": [
+      "<rootDir>"
+    ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [

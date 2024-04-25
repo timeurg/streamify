@@ -2,11 +2,10 @@ import { Readable, Writable } from "node:stream";
 import { Observable, Subject } from "rxjs";
 import { DataBusTypeMap } from "src/databus/domain/databus";
 import { ProtocolAdaptor } from "src/databus/domain/protocol";
-import { ConnectionOptions, Empty, ErrorCode, JSONCodec, NatsConnection, StringCodec, connect, headers } from "nats";
+import { ConnectionOptions, NatsConnection, StringCodec, connect, headers } from "nats";
 import { promises as fs } from "node:fs";
 import * as util from 'node:util';
 import { DataBusErrors } from "../../errors";
-import * as crypto from 'node:crypto';
 import { NatsReadableStream } from "./nats/input.stream";
 import { NatsWritableStream } from "./nats/output.stream";
 
@@ -24,8 +23,27 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
     constructor(private connectionString: string) {}
     
     async connect(mode: keyof DataBusTypeMap): Promise<void> {
-        const config = await fs.readFile(this.connectionString, {encoding: 'utf-8'});
-        this.config = JSON.parse(config);
+        let config: string;
+        try {
+            config = await fs.readFile(this.connectionString, {encoding: 'utf-8'});
+            this.config = JSON.parse(config);
+        } catch (e) {
+            const [connection, subject] = this.connectionString.split('/');
+            if (connection && subject) {
+                this.config = {
+                    connection: {
+                        port: Number.parseInt(connection).toString() == connection 
+                                ? Number.parseInt(connection) : undefined,
+                        servers: Number.parseInt(connection).toString() == connection 
+                                ? undefined : connection.split(','),
+                    },
+                    subject,
+                }
+            } else {
+                throw e;
+            }
+        }
+        
         //@TODO check config
         this.connection = await connect(this.config.connection);
         this.state$.next('READY');

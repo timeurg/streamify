@@ -5,6 +5,7 @@ import { DataBusErrors } from "../errors";
 import { ProtocolAdaptor, ProtocolAdaptorConstructor, ProtocolAdaptorFactory } from "../domain/protocol";
 import { StdProtocolAdaptor } from "./protocols/std";
 import { FileProtocolAdaptor } from "./protocols/file";
+import { NatsProtocolAdaptor } from "./protocols/nats";
 
 
 @Injectable()
@@ -12,6 +13,7 @@ export class ProtocolAdaptorFactoryImplement implements ProtocolAdaptorFactory {
     private readonly classMap: {[key: string]: Partial<ProtocolAdaptor> & ProtocolAdaptorConstructor} = {
         'std': StdProtocolAdaptor,
         'file': FileProtocolAdaptor,
+        'nats': NatsProtocolAdaptor,
     }
 
     create(connectionString: string): ProtocolAdaptor {

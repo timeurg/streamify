@@ -39,17 +39,23 @@ CLI приложение со следующим синтаксом:
 
 # Scripts
 
-- `docker compose -f "docker.compose.yml" up -d --build`
-- `docker run --rm reader `
-- аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
-- аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
-- аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
+- создать большой файл для теста: `head -c 50M /dev/urandom > temp/sample.txt` или `tr -dc 'a-zA-Z0-9\n' </dev/urandom | head -c 50M > sample.txt` для читабельности
+- собрать образы `docker compose -f "docker.compose.yml" up -d --build`
+- тестировать разные комбинации передачи:
+- - поднять Writer и NATS `docker compose -f "docker.compose.yml" up writer nats`
+- - настроить HighWaterMark `docker run --rm -e NATS_OUT_HWM=800 -v ${PWD}/temp:/home/node/temp --net=host reader ../temp/sample.txt nats:4222/file-transfer` (или, например, направить `/dev/urandom` на вход)
+- проверить что ничего не потерялось при передаче `md5sum temp/copy-over-nats.txt temp/copy-over-nats.txt`
+- разное:
+- - аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
+- - аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
+- - аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
  std ../temp/doc2`
-- создать большой файл для теста: `head -c 50M /dev/urandom > temp/sample.txt` или `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 50M > sample.txt` для читабельности
+
 
 ## Debug
 
 - local `cd read-work-write && npm run start:dev -- -- [[-w worker]] <source> [target]`
+- - `npm run start:dev -- -- ../temp/sample.txt nats:4222/file-transfer` - reader
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
 
 ## ToDo

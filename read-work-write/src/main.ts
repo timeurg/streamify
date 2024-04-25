@@ -11,4 +11,12 @@ async function bootstrap() {
 
 bootstrap();
 
+process.on('SIGINT', function() {
+  console.log('SIGINT exit');
+  process.exit();
+}); 
+process.on('SIGTERM', function() {
+  console.log('SIGTERM exit');
+  process.exit();
+});
 process.on('exit', () => console.log('Exited', new Date()));

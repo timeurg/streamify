@@ -126,7 +126,7 @@ describe('NatsProtocolAdaptor', () => {
       });
     })
     describe('integration', () => {
-      test.only('data written to NatsProtocolAdaptor in output mode can be read from NatsProtocolAdaptor in input mode', async () => {
+      test('data written to NatsProtocolAdaptor in output mode can be read from NatsProtocolAdaptor in input mode', async () => {
         const data1 = 'A stream is an abstract interface for working with streaming data in Node.js. The node:stream module provides an API for implementing the stream interface.',
               data2 = 'There are many stream objects provided by Node.js. For instance, a request to an HTTP server and process.stdout are both stream instances.',
               output = new NatsProtocolAdaptor(config), input = new NatsProtocolAdaptor(config);

@@ -5,10 +5,12 @@ import { OnModuleDestroy } from "@nestjs/common";
 import { Readable, Writable } from "node:stream";
 import { DataBusConnectStartEvent, DataBusConnectSuccessEvent, DataBusStreamCreatedEvent } from "src/databus/domain/databus.events";
 import { ProtocolAdaptor } from "src/databus/domain/protocol";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 
 export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor  {
     private fileHandle: fs.FileHandle;
     private stream: Readable | Writable;
+
     constructor(private connectionString: string) {
     };
 
@@ -48,6 +50,15 @@ export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor  {
         if (this.fileHandle) {
             this.fileHandle.close()
         }
+    }
+    
+    disconnect(): Promise<void> {
+        return;
+    }
+    
+    private state$: Subject<'BUSY'|'READY'> = new BehaviorSubject('READY');
+    state(): Observable<"BUSY" | "READY"> {
+        return this.state$.asObservable();
     }
 
 }
