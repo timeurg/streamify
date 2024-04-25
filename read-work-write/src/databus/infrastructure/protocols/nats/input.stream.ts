@@ -5,24 +5,41 @@ import { Readable, ReadableOptions } from 'node:stream';
 // https://nodejs.org/api/stream.html#api-for-stream-implementers
 export class NatsReadableStream extends Readable {
   private timeout: number = 1000;
-  private headers: MsgHdrs = headers();
-  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string) {
-    
+  private batchCount = 0;
+  private transactionId: string;
+
+  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string) {    
     super(options);
-    this.headers.append("transactionId", crypto.randomUUID())
-    
+    this.transactionId = crypto.randomUUID();
   }
+
+  headers () {
+    const header = headers();
+    header.append("transactionId", this.transactionId);
+    header.append("batchCount", this.batchCount.toString());
+    return header;
+  }
+
+  private inFlight = false;
 
   // https://nodejs.org/api/stream.html#readable_readsize
   async _read(n) {
-    let ready = true, offset = 0;
+    if (this.inFlight) {
+      return;
+    } else {
+      this.inFlight = true;
+    }
+    let ready = true;
+    if (this.batchCount !== 0) {
+      this.batchCount++;
+    }
     while (ready && !this.connection.isClosed() && !this.connection.isDraining()) {
         try {
-            let data;
+            let data: string | Uint8Array;
             await this.connection.request(
                 this.subject, 
                 Empty, 
-                { noMux: true, timeout: this.timeout, headers: this.headers }
+                { noMux: true, timeout: this.timeout, headers: this.headers() }
             ).then((m) => {
                 data = m.data;
             });
@@ -30,6 +47,7 @@ export class NatsReadableStream extends Readable {
                 data = null;
             }
             ready = this.push(data);
+            this.batchCount++;
         } catch (error) {
             switch (error.code) {
               case ErrorCode.NoResponders:
@@ -46,5 +64,7 @@ export class NatsReadableStream extends Readable {
             }
         }
     }
+    
+    this.inFlight = false;
   }
 } 

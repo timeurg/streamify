@@ -33,8 +33,9 @@ export const natsHelloWorld = async (options: ConnectionOptions) => {
 // sets "transactionId" header to identify request origin
 export const natsTestRequest = async (options: ConnectionOptions, subject: string) => {
     const testClient = await connect({...options});
-    const timeout = 1000, header = headers();
+    const timeout = 5000, header = headers();
     header.append("transactionId", crypto.randomUUID());
+    header.append("batchCount", '0');
     let output: string;
     await testClient.request(
         subject, 

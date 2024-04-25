@@ -57,8 +57,10 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
         }
         if (mode == 'input') {
             this.stream = new NatsReadableStream({}, this.connection, this.config.subject);
+            this.stream.on('close', () => this.disconnect())
         } else {
             this.stream = new NatsWritableStream({}, this.connection, this.config.subject);
+            this.stream.on('finish', () => this.disconnect());
         }
         return this.stream;
     }    
