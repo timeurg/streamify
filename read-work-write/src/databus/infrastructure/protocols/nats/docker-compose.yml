@@ -1,0 +1,7 @@
+name: 'read-n-write-testinfra-nats'
+
+services:
+  nats:
+    image: nats:2.10.14-alpine3.19 # https://github.com/nats-io/nats-docker/blob/main/2.10.x/alpine3.19/
+    ports:
+      - 4222
