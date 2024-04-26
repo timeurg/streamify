@@ -37,7 +37,7 @@ const processData = (data) => {
 
 Объем отправляемых в конкретном запросе данных регулируется параметром инициализации [highWaterMark](https://nodejs.org/api/stream.html#new-streamwritableoptions) у выходного потока. Для подбора оптимального значения для конкретной передачи реализовано чтение этого параметра из переменной окружения `NATS_OUT_HWM`. При тестировании скорость передачи быстро упирается в конфигурацию max payload у NATS. 
 
-С учетом вышеперечисленного механизма специального замедления транспортов/обработки не реализовывалось.
+С учетом вышеперечисленного, механизма специального замедления транспортов/обработки не реализовывалось.
  
 
 # Дополнительно (по возможности):
@@ -47,7 +47,7 @@ const processData = (data) => {
 На данный момент поддерживаются транспорты STD (stdin, stdout), FILE и NATS, так что поддержка различных видов траспорта реализована &#128517;
 
 В основе приложения Node Streams, сама реализация (домен) не делает предположений о передаваемых данных, так что по сути транспорт-адаптеры могут возвращать Stream например в objectMode. 
-Worker'ы (на данный момент не реализованы, но реализация тривиальна) представляют из себя TransformStream'ы. Объединеняя worker'ы в pipeline'ы приложение может реализовывать интересные трансформации, например:
+Worker'ы представляют из себя TransformStream'ы. Объединеняя worker'ы в pipeline'ы приложение может реализовывать интересные трансформации, например:
 `input(gRPC) -> toObject -> toDTO -> buisnessLogic -> entity -> postgreSQL`
 
 ## 2. Покрыть тестами.
@@ -71,6 +71,7 @@ CLI приложение со следующим синтаксом:
 
 - `<run>` команда на запуск приложения, например `node dist/main` или `docker run --rm reader`
 - `-w --worker` потоковый обработчик передаваемых данных, можно передать несколько, порядок имеет значение
+  - на  данный момент доступен только `-w gzip`, вызывающий `require('node:zlib').createGzip()`
 - аргументы `<source> [target]` - источник и назначение данных. Если указано одно значение оно считаетается источником. Значения имеют вид `ПРОТОКОЛ:НАСТРОЙКИ`, если не указан протокол, но значение не пустое используется протокол `file`, если значение пустое - `std` (stdin для источника, stdout для назначения)
 
 # Scripts
@@ -78,20 +79,20 @@ CLI приложение со следующим синтаксом:
 - создать большой файл для теста: `head -c 50M /dev/urandom > temp/sample.txt` или `tr -dc 'a-zA-Z0-9\n' </dev/urandom | head -c 50M > temp/sample.txt` для читабельности
 - собрать образы `docker compose -f "docker.compose.yml" up -d --build`
 - тестировать разные комбинации передачи:
-- - поднять Writer и NATS `docker compose -f "docker.compose.yml" up writer nats`
-- - настроить HighWaterMark `docker run --rm -e NATS_OUT_HWM=800 -v ${PWD}/temp:/home/node/temp --net=host reader ../temp/sample.txt nats:4222/file-transfer` (или, например, направить `/dev/urandom` на вход)
+  - поднять Writer и NATS `docker compose -f "docker.compose.yml" up writer nats`
+  - настроить HighWaterMark `docker run --rm -e NATS_OUT_HWM=800 -v ${PWD}/temp:/home/node/temp --net=host reader ../temp/sample.txt nats:4222/file-transfer` (или, например, направить `/dev/urandom` на вход)
 - проверить что ничего не потерялось при передаче `md5sum temp/sample.txt temp/copy-over-nats.txt`
 - разное:
-- - аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
-- - аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
-- - аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
+  - аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
+  - аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
+  - аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
  std ../temp/doc2`
 
 
 ## Debug
 
 - local `cd read-work-write && npm run start:dev -- -- [[-w worker]] <source> [target]`
-- - `npm run start:dev -- -- ../temp/sample.txt nats:4222/file-transfer` - reader
+  - `npm run start:dev -- -- ../temp/sample.txt nats:4222/file-transfer` - reader
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
 
 ## ToDo

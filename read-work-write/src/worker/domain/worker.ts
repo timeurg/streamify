@@ -1,6 +1,7 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import { AggregateRoot } from '@nestjs/cqrs';
-import { Readable, Writable } from 'node:stream';
+import { Readable, Transform, Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { DataBusType, DataBusTypeMap } from 'src/databus/domain/databus';
 import { WorkerConnectStarted, WorkerReadyEvent } from './worker.events';
 
@@ -13,7 +14,7 @@ export type WorkerEssentialProperties = Readonly<
 
 export type WorkerOptionalProperties = Readonly<
   Partial<{
-    workload: string[];
+    workload: Transform[];
   }>
 >;
 
@@ -30,7 +31,7 @@ export interface Worker {
 export class WorkerImplement extends AggregateRoot implements Worker {
   private readonly input: string;
   private readonly output: string;
-  private readonly workload: string[];
+  private readonly workload: Transform[];
   private input_: Readable;
   private output_: Writable;
 
@@ -40,6 +41,9 @@ export class WorkerImplement extends AggregateRoot implements Worker {
   ) {
     super();
     Object.assign(this, properties);
+    if (!this.workload) {
+      this.workload = [];
+    }
     this.logger.verbose(
       `Starting worker: ${properties.input} ${properties.output} ${properties.workload}`,
     );
@@ -62,6 +66,7 @@ export class WorkerImplement extends AggregateRoot implements Worker {
   }
 
   startTransfer(): void {
-    this.input_.pipe(this.output_);
+    pipeline([this.input_, ...this.workload, this.output_]);
+    // this.input_.pipe(this.output_);
   }
 }
