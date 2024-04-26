@@ -13,7 +13,7 @@
 
 Предлагаемая базовая модель исполнения:
 
-![Domain and Application](./domain-and-application.png)
+![Domain and Application](./assets/domain-and-application.png)
 
 
 

@@ -15,13 +15,21 @@ COPY --chown=node:node --from=development /home/node/app/node_modules ./node_mod
 COPY --chown=node:node . .
 ENV NODE_ENV production
 RUN npm run build
+USER node
+
+FROM node:lts-alpine As deps
+WORKDIR /home/node/app
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node --from=development /home/node/app/node_modules ./node_modules
+COPY --chown=node:node . .
+ENV NODE_ENV production
 RUN npm ci --only=production && npm cache clean --force
 USER node
 
 FROM node:lts-alpine As production
 WORKDIR /home/node/app
 ENV NODE_ENV production
-COPY --chown=node:node --from=build /home/node/app/node_modules ./node_modules
+COPY --chown=node:node --from=deps /home/node/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /home/node/app/dist ./dist
 ENTRYPOINT ["node", "dist/main.js"]
 USER node
