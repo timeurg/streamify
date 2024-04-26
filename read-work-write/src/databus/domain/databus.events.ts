@@ -11,6 +11,8 @@ export class DataBusConnectSuccessEvent implements IEvent {
 }
 
 export class DataBusStreamCreatedEvent implements IEvent {
-  constructor(public dataBus: DataBus, public stream: Readable | Writable) {
-  }
+  constructor(
+    public dataBus: DataBus,
+    public stream: Readable | Writable,
+  ) {}
 }

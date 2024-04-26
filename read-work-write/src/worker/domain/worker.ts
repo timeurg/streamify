@@ -28,35 +28,40 @@ export interface Worker {
 
 @Injectable()
 export class WorkerImplement extends AggregateRoot implements Worker {
-    private readonly input: string;
-    private readonly output: string;
-    private readonly workload: string[];
-    private input_: Readable;
-    private output_: Writable;
+  private readonly input: string;
+  private readonly output: string;
+  private readonly workload: string[];
+  private input_: Readable;
+  private output_: Writable;
 
-    constructor(properties: WorkerProperties, private logger: LoggerService) {
-      super();
-      Object.assign(this, properties);
-      this.logger.verbose(`Starting worker: ${properties.input} ${properties.output} ${properties.workload}`);
-      this.autoCommit = true;
+  constructor(
+    properties: WorkerProperties,
+    private logger: LoggerService,
+  ) {
+    super();
+    Object.assign(this, properties);
+    this.logger.verbose(
+      `Starting worker: ${properties.input} ${properties.output} ${properties.workload}`,
+    );
+    this.autoCommit = true;
+  }
+
+  connect(): void {
+    this.apply(new WorkerConnectStarted(this.input, this.output));
+  }
+
+  setStream(mode: keyof DataBusTypeMap, stream: Writable | Readable): void {
+    if (mode == 'input') {
+      this.input_ = stream as Readable;
+    } else {
+      this.output_ = stream as Writable;
     }
-
-    connect(): void {
-      this.apply(new WorkerConnectStarted(this.input, this.output));
-    };
-
-    setStream(mode: keyof DataBusTypeMap, stream: Writable | Readable): void {
-      if (mode == 'input') {
-        this.input_ = stream as Readable;
-      } else {
-        this.output_ = stream as Writable;
-      }
-      if (this.input_ && this.output_) {
-        this.apply(new WorkerReadyEvent(this));
-      }
+    if (this.input_ && this.output_) {
+      this.apply(new WorkerReadyEvent(this));
     }
+  }
 
-    startTransfer(): void {
-      this.input_.pipe(this.output_);
-    }
+  startTransfer(): void {
+    this.input_.pipe(this.output_);
+  }
 }

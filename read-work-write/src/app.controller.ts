@@ -4,21 +4,22 @@ import { AppStartedEvent } from './common/events';
 import { Inject, LoggerService } from '@nestjs/common';
 import { CommonInjectionTokens } from './common/injection-tokens';
 
-
 interface AppDefaultCommandOptions {
   parameter?: string;
   workload?: string[];
   verbose?: boolean;
 }
 
-@RootCommand({ 
-  description: 'Application entrypoint',  
+@RootCommand({
+  description: 'Application entrypoint',
 })
 export class AppDefaultCommand extends CommandRunner {
-
   @Inject(CommonInjectionTokens.App_Logger) private logger: LoggerService;
 
-  constructor(private commandBus: CommandBus, private eventBus: EventBus) {
+  constructor(
+    private commandBus: CommandBus,
+    private eventBus: EventBus,
+  ) {
     super();
   }
 
@@ -30,7 +31,14 @@ export class AppDefaultCommand extends CommandRunner {
     }
     this.logger.verbose('Verbose output enabled');
     const [input, output] = args;
-    this.eventBus.publish(new AppStartedEvent(input || '', output || '', options?.workload || [], options || {}));
+    this.eventBus.publish(
+      new AppStartedEvent(
+        input || '',
+        output || '',
+        options?.workload || [],
+        options || {},
+      ),
+    );
   }
 
   @Option({

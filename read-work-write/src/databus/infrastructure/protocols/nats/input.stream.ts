@@ -1,5 +1,5 @@
-import { LoggerService } from "@nestjs/common";
-import { Empty, ErrorCode, MsgHdrs, NatsConnection, headers } from "nats";
+import { LoggerService } from '@nestjs/common';
+import { Empty, ErrorCode, MsgHdrs, NatsConnection, headers } from 'nats';
 import * as crypto from 'node:crypto';
 import { Readable, ReadableOptions } from 'node:stream';
 
@@ -9,15 +9,20 @@ export class NatsReadableStream extends Readable {
   private batchCount = 0;
   private transactionId: string;
 
-  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string, private logger: LoggerService) {    
+  constructor(
+    options: ReadableOptions,
+    private connection: NatsConnection,
+    private subject: string,
+    private logger: LoggerService,
+  ) {
     super(options);
     this.transactionId = crypto.randomUUID();
   }
 
-  headers () {
+  headers() {
     const header = headers();
-    header.append("transactionId", this.transactionId);
-    header.append("batchCount", this.batchCount.toString());
+    header.append('transactionId', this.transactionId);
+    header.append('batchCount', this.batchCount.toString());
     return header;
   }
 
@@ -34,39 +39,45 @@ export class NatsReadableStream extends Readable {
     if (this.batchCount !== 0) {
       this.batchCount++;
     }
-    while (ready && !this.connection.isClosed() && !this.connection.isDraining()) {
-        try {
-            let data: string | Uint8Array;
-            await this.connection.request(
-                this.subject, 
-                Empty, 
-                { noMux: true, timeout: this.timeout, headers: this.headers() }
-            ).then((m) => {
-                data = m.data;
-            });
-            if (data.length == 0) {
-              this.logger.log('End of transfer')
-                data = null;
-            }
-            ready = this.push(data);
-            this.batchCount++;
-        } catch (error) {
-            switch (error.code) {
-              case ErrorCode.NoResponders:
-                await new Promise(r => setTimeout(r, this.timeout));
-                break;
-              case ErrorCode.Timeout:
-                break;
-            case ErrorCode.ConnectionDraining:
-                ready = false;
-                break;
-              default:
-                this.logger.error('Unknown NATS error', error)
-                throw error;
-            }
+    while (
+      ready &&
+      !this.connection.isClosed() &&
+      !this.connection.isDraining()
+    ) {
+      try {
+        let data: string | Uint8Array;
+        await this.connection
+          .request(this.subject, Empty, {
+            noMux: true,
+            timeout: this.timeout,
+            headers: this.headers(),
+          })
+          .then((m) => {
+            data = m.data;
+          });
+        if (data.length == 0) {
+          this.logger.log('End of transfer');
+          data = null;
         }
+        ready = this.push(data);
+        this.batchCount++;
+      } catch (error) {
+        switch (error.code) {
+          case ErrorCode.NoResponders:
+            await new Promise((r) => setTimeout(r, this.timeout));
+            break;
+          case ErrorCode.Timeout:
+            break;
+          case ErrorCode.ConnectionDraining:
+            ready = false;
+            break;
+          default:
+            this.logger.error('Unknown NATS error', error);
+            throw error;
+        }
+      }
     }
-    
+
     this.inFlight = false;
   }
-} 
+}

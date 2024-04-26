@@ -4,7 +4,6 @@ import { GetDataBusCommand, GetDataBusStreamCommand } from './commands';
 import { InjectionToken } from './injection-tokens';
 import { DataBusFactory } from '../domain/databus.factory';
 
-
 @CommandHandler(GetDataBusCommand)
 export class GetDataBusCommandHandler
   implements ICommandHandler<GetDataBusCommand, void>
@@ -17,7 +16,6 @@ export class GetDataBusCommandHandler
     bus.connect();
   }
 }
-
 
 @CommandHandler(GetDataBusStreamCommand)
 export class GetDataBusStreamCommandHandler

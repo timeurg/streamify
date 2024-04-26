@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { ICommand, Saga, ofType } from "@nestjs/cqrs";
-import { Observable, map } from "rxjs";
+import { Injectable } from '@nestjs/common';
+import { ICommand, Saga, ofType } from '@nestjs/cqrs';
+import { Observable, map } from 'rxjs';
 
 @Injectable()
 export class DataBusSagas {

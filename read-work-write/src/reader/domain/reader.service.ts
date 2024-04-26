@@ -1,2 +1,1 @@
-export class ReaderDomainService {
-}
+export class ReaderDomainService {}

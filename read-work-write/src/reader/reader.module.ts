@@ -5,21 +5,14 @@ import { ReaderFactory } from './domain/reader.factory';
 import { ReaderDomainService } from './domain/reader.service';
 import { WorkerModule } from 'src/worker/worker.module';
 
-const infrastructure: Provider[] = [
+const infrastructure: Provider[] = [];
 
-];
+const application = [ReaderSagas];
 
-const application = [
-  ReaderSagas
-];
-
-const domain = [
-  ReaderFactory,
-  ReaderDomainService,
-];
+const domain = [ReaderFactory, ReaderDomainService];
 
 @Module({
   imports: [WorkerModule, CqrsModule],
-  providers: [ ...infrastructure, ...application, ...domain],
+  providers: [...infrastructure, ...application, ...domain],
 })
 export class ReaderModule {}

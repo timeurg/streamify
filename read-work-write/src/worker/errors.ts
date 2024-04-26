@@ -1,4 +1,1 @@
-export enum WorkerErrors {
-    
-}
-  
+export enum WorkerErrors {}

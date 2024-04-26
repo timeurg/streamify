@@ -4,24 +4,23 @@ import { WorkerSagas } from './application/worker.saga';
 import { WorkerFactory } from './domain/worker.factory';
 import { WorkerDomainService } from './domain/worker.service';
 import { DataBusModule } from 'src/databus/databus.module';
-import { AssignStreamCommandHandler, GetWorkerCommandHandler, StartTransferCommandHandler } from './application/handlers';
+import {
+  AssignStreamCommandHandler,
+  GetWorkerCommandHandler,
+  StartTransferCommandHandler,
+} from './application/handlers';
 import { LoggerModule } from 'src/common/logger.module';
 
-const infrastructure: Provider[] = [
-
-];
+const infrastructure: Provider[] = [];
 
 const application = [
   GetWorkerCommandHandler,
   AssignStreamCommandHandler,
   StartTransferCommandHandler,
-  WorkerSagas
+  WorkerSagas,
 ];
 
-const domain = [
-  WorkerFactory,
-  WorkerDomainService,
-];
+const domain = [WorkerFactory, WorkerDomainService];
 
 @Module({
   imports: [LoggerModule, DataBusModule, CqrsModule],

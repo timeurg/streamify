@@ -8,24 +8,23 @@ import { CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs';
 import { LoggerModule } from './common/logger.module';
 
 export class LogCommand implements ICommand {
-  constructor(public event) {
-  }
+  constructor(public event) {}
 }
 
 @CommandHandler(LogCommand)
-export class LogCommandHandler
-  implements ICommandHandler<LogCommand, void> {
-    private logger: Logger;
+export class LogCommandHandler implements ICommandHandler<LogCommand, void> {
+  private logger: Logger;
 
   async execute(command: LogCommand): Promise<void> {
-    this.logger.log({_event: command.event.constructor.name, ...JSON.parse(JSON.stringify(command.event))});
+    this.logger.log({
+      _event: command.event.constructor.name,
+      ...JSON.parse(JSON.stringify(command.event)),
+    });
   }
 }
 
 @Module({
   imports: [LoggerModule, ReaderModule, CqrsModule.forRoot()],
-  providers: [
-    AppDefaultCommand, AppService, LogCommandHandler,
-  ],
+  providers: [AppDefaultCommand, AppService, LogCommandHandler],
 })
 export class AppModule {}

@@ -1,10 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
-import {
-  DataBus,
-  DataBusProperties,
-  DataBusType,
-} from './databus';
+import { DataBus, DataBusProperties, DataBusType } from './databus';
 import { InjectionToken } from '../application/injection-tokens';
 import { ProtocolAdaptorFactory } from './protocol';
 
@@ -20,10 +16,11 @@ export type CreateDataBusOptions = Readonly<{
 @Injectable()
 export class DataBusFactory {
   @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
-  @Inject(InjectionToken.ProtocolAdaptor_FACTORY) private transportFactory: ProtocolAdaptorFactory;
+  @Inject(InjectionToken.ProtocolAdaptor_FACTORY)
+  private transportFactory: ProtocolAdaptorFactory;
   @Inject() private logger: Logger;
 
-  create(options: CreateDataBusOptions): DataBus {  
+  create(options: CreateDataBusOptions): DataBus {
     return this.eventPublisher.mergeObjectContext(
       new DataBus(
         { ...options },
@@ -35,7 +32,11 @@ export class DataBusFactory {
 
   reconstitute(properties: DataBusProperties): DataBus {
     return this.eventPublisher.mergeObjectContext(
-      new DataBus(properties, this.transportFactory.create(properties.connectionString), this.logger),
+      new DataBus(
+        properties,
+        this.transportFactory.create(properties.connectionString),
+        this.logger,
+      ),
     );
   }
 }

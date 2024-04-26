@@ -1,14 +1,8 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 
-export type ReaderEssentialProperties = Readonly<
-  Required<{
-  }>
->;
+export type ReaderEssentialProperties = Readonly<object>;
 
-export type ReaderOptionalProperties = Readonly<
-  Partial<{
-  }>
->;
+export type ReaderOptionalProperties = Readonly<Partial<object>>;
 
 export type ReaderProperties = ReaderEssentialProperties &
   Required<ReaderOptionalProperties>;
@@ -18,12 +12,10 @@ export interface Reader {
 }
 
 export class ReaderImplement extends AggregateRoot implements Reader {
+  constructor(properties: ReaderProperties) {
+    super();
+    Object.assign(this, properties);
+  }
 
-    constructor(properties: ReaderProperties) {
-      super();
-      Object.assign(this, properties);
-    }
-
-    connect(): void {
-    };
+  connect(): void {}
 }

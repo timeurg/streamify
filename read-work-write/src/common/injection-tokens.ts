@@ -1,3 +1,3 @@
 export enum CommonInjectionTokens {
-    App_Logger = 'AppLogger',
+  App_Logger = 'AppLogger',
 }

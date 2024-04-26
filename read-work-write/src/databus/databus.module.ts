@@ -1,10 +1,19 @@
-import { BadRequestException, Logger, Module, Provider, Scope } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  Module,
+  Provider,
+  Scope,
+} from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DataBusSagas } from './application/databus.saga';
 import { DataBusFactory } from './domain/databus.factory';
 import { DataBusDomainService } from './domain/databus.service';
 import { InjectionToken } from 'src/databus/application/injection-tokens';
-import { GetDataBusCommandHandler, GetDataBusStreamCommandHandler } from './application/handlers';
+import {
+  GetDataBusCommandHandler,
+  GetDataBusStreamCommandHandler,
+} from './application/handlers';
 import { ProtocolAdaptor, ProtocolAdaptorConstructor } from './domain/protocol';
 import { StdProtocolAdaptor } from './infrastructure/protocols/std';
 import { FileProtocolAdaptor } from './infrastructure/protocols/file';
@@ -14,26 +23,31 @@ import * as util from 'node:util';
 import { DataBusErrors } from './errors';
 import { LoggerModule } from 'src/common/logger.module';
 
-const classMap: {[key: string]: Partial<ProtocolAdaptor> & ProtocolAdaptorConstructor} = {
-  'std': StdProtocolAdaptor,
-  'file': FileProtocolAdaptor,
-  'nats': NatsProtocolAdaptor,
-}
+const classMap: {
+  [key: string]: Partial<ProtocolAdaptor> & ProtocolAdaptorConstructor;
+} = {
+  std: StdProtocolAdaptor,
+  file: FileProtocolAdaptor,
+  nats: NatsProtocolAdaptor,
+};
 
 const infrastructure: Provider[] = [
   {
     provide: InjectionToken.ProtocolAdaptor_FACTORY,
-    inject: [ Logger ],
+    inject: [Logger],
     useFactory: function (logger: Logger) {
       return {
         create(connectionString: string): ProtocolAdaptor {
-          let {protocol, connectionOptions} = parseConnectionString(connectionString);
+          const { protocol, connectionOptions } =
+            parseConnectionString(connectionString);
           if (!classMap[protocol]) {
-              throw new BadRequestException(util.format(DataBusErrors.UNKNOWN_PROTOCOL, protocol))
+            throw new BadRequestException(
+              util.format(DataBusErrors.UNKNOWN_PROTOCOL, protocol),
+            );
           }
-  
-          return new (classMap[protocol])(connectionOptions, { logger });
-      }
+
+          return new classMap[protocol](connectionOptions, { logger });
+        },
       };
     },
   },
@@ -45,13 +59,10 @@ const application = [
   DataBusSagas,
 ];
 
-const domain = [
-  DataBusDomainService,
-  DataBusFactory,
-];
+const domain = [DataBusDomainService, DataBusFactory];
 
 @Module({
   imports: [LoggerModule, CqrsModule],
-  providers: [ ...infrastructure, ...application, ...domain],
+  providers: [...infrastructure, ...application, ...domain],
 })
 export class DataBusModule {}
