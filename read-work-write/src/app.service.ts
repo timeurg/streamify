@@ -1,16 +1,16 @@
-import { Injectable } from "@nestjs/common";
-import { CommandBus, UnhandledExceptionBus } from "@nestjs/cqrs";
+import { Injectable, Logger } from "@nestjs/common";
+import { UnhandledExceptionBus } from "@nestjs/cqrs";
 import { Subject, takeUntil } from "rxjs";
 
 @Injectable()
 export class AppService {
     private destroy$ = new Subject<void>();
 
-    constructor(private unhandledExceptionsBus: UnhandledExceptionBus) {
+    constructor(private unhandledExceptionsBus: UnhandledExceptionBus, private logger: Logger) {
         this.unhandledExceptionsBus
             .pipe(takeUntil(this.destroy$))
             .subscribe((exceptionInfo) => {
-                console.error(exceptionInfo);
+                this.logger.error('App Exception:', exceptionInfo);
                 process.exit(1);
             });
     }

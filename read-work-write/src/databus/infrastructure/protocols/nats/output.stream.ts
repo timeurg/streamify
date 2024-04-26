@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { Empty, ErrorCode, MsgHdrs, NatsConnection, StringCodec, Subscription, headers } from "nats";
 import { config } from "node:process";
 import { WritableOptions, Writable, getDefaultHighWaterMark } from 'node:stream';
@@ -19,11 +20,11 @@ export class NatsWritableStream extends Writable {
 
   
 
-  constructor(options: WritableOptions, private connection: NatsConnection, private subject: string) {
-    console.log(`Higwatermark at ${runTimeConfiguration.NatsOutputHighWaterMark}`)
+  constructor(options: WritableOptions, private connection: NatsConnection, private subject: string, private logger: Logger) {
     super(Object.assign(options, {
       highWaterMark: runTimeConfiguration.NatsOutputHighWaterMark,
     }));
+    this.logger.debug(`Higwatermark at ${runTimeConfiguration.NatsOutputHighWaterMark}`)
     this.subscription = this.connection.subscribe(this.subject);
   }
 
@@ -40,7 +41,7 @@ export class NatsWritableStream extends Writable {
           // new transaction
           if (!this.transactionId && batchCount == 0) {
             this.transactionId = transactionId;
-            console.log(`Transaction ${this.transactionId} started`);
+            this.logger.log(`Transaction ${this.transactionId} started`);
           }
           // we respond only to current batchCount queries
           // batchCount increase in request means 
@@ -51,7 +52,7 @@ export class NatsWritableStream extends Writable {
               const chunk = this.currentChunk.getValue();
               if (chunk) {
                 m.respond(chunk instanceof Uint8Array ? chunk : sc.encode(chunk));
-                console.log(`Batch ${this.batchCount} sent`);
+                this.logger.verbose(`Batch ${this.batchCount} sent`);
                 if (chunk.length == 0) {
                   this.callback(); //end of transfer
                 }
@@ -61,13 +62,13 @@ export class NatsWritableStream extends Writable {
               this.batchCount++;
               this.callback();
             } else {
-              console.log(`Client asks for batch ${batchCount}, we're at ${this.batchCount}`);
+              this.logger.log(`Client asks for batch ${batchCount}, we're at ${this.batchCount}`);
             }
           }
         }
       }
     })(this.subscription).catch(e => {
-      console.log(e);
+      this.logger.error(e);
       this.callback(e);
     });
   }
@@ -85,7 +86,7 @@ export class NatsWritableStream extends Writable {
   private last = 0;
   _write(chunk, encoding, callback) {
     if (chunk.length > this.last) {
-      console.log('Queued', chunk.length / 1024, 'Kb', this.transactionId ? `for ${this.transactionId} batch number ${this.batchCount}` : '' )
+      this.logger.verbose(`Queued ${chunk.length / 1024} Kb ${this.transactionId ? `for ${this.transactionId} batch number ${this.batchCount}` : ''}` )
       this.last = chunk.length;
     }
     this.subLoop();
@@ -94,14 +95,14 @@ export class NatsWritableStream extends Writable {
   }
 
   _writev(chunks, callback) {
-    console.log('Queued', (chunks.length * 65536 / 1024 / 1024), 'Mb', 'batch', this.batchCount);
+    this.logger.verbose(`Queued ${(chunks.length * 65536 / 1024 / 1024)} Mb, batch: ${this.batchCount}`);
     this.subLoop();
     this.currentCallback.next(callback);
     this.currentChunk.next(chunks.map(c => c.chunk).join(''));
   }
 
   _final(callback: (error?: Error) => void): void {
-    console.log(`Transaction ${this.transactionId} ended`);
+    this.logger.log(`Transaction ${this.transactionId} ended`);
     this.callback();
     this.currentCallback.complete();
     this.currentChunk.complete();

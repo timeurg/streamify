@@ -1,11 +1,14 @@
 import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { RootCommand, CommandRunner, Option } from 'nest-commander';
 import { AppStartedEvent } from './common/events';
+import { Inject, LoggerService } from '@nestjs/common';
+import { CommonInjectionTokens } from './common/injection-tokens';
 
 
 interface AppDefaultCommandOptions {
   parameter?: string;
   workload?: string[];
+  verbose?: boolean;
 }
 
 @RootCommand({ 
@@ -13,21 +16,30 @@ interface AppDefaultCommandOptions {
 })
 export class AppDefaultCommand extends CommandRunner {
 
+  @Inject(CommonInjectionTokens.App_Logger) private logger: LoggerService;
+
   constructor(private commandBus: CommandBus, private eventBus: EventBus) {
     super();
   }
 
   async run(args: string[], options?: AppDefaultCommandOptions): Promise<void> {
+    if (options.verbose) {
+      this.logger.setLogLevels(['verbose']);
+    } else {
+      this.logger.setLogLevels(['log']);
+    }
+    this.logger.verbose('Verbose output enabled');
     const [input, output] = args;
     this.eventBus.publish(new AppStartedEvent(input || '', output || '', options?.workload || [], options || {}));
   }
 
   @Option({
-    flags: '-p, --parameter [parameter]',
-    description: 'An arbitrary parameter'
+    flags: '--verbose [verbose]',
+    description: 'Verbose output',
+    defaultValue: false,
   })
-  parseString(val: string): string {
-    return val.trim();
+  verbose(): boolean {
+    return true;
   }
 
   @Option({

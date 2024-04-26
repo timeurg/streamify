@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppDefaultCommand } from './app.controller';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ReaderModule } from './reader/reader.module';
 import { AppService } from './app.service';
 
 import { CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs';
+import { LoggerModule } from './common/logger.module';
 
 export class LogCommand implements ICommand {
   constructor(public event) {
@@ -14,14 +15,17 @@ export class LogCommand implements ICommand {
 @CommandHandler(LogCommand)
 export class LogCommandHandler
   implements ICommandHandler<LogCommand, void> {
+    private logger: Logger;
 
   async execute(command: LogCommand): Promise<void> {
-    console.log({_event: command.event.constructor.name, ...JSON.parse(JSON.stringify(command.event))});
+    this.logger.log({_event: command.event.constructor.name, ...JSON.parse(JSON.stringify(command.event))});
   }
 }
 
 @Module({
-  imports: [ReaderModule, CqrsModule.forRoot()],
-  providers: [AppDefaultCommand, AppService, LogCommandHandler],
+  imports: [LoggerModule, ReaderModule, CqrsModule.forRoot()],
+  providers: [
+    AppDefaultCommand, AppService, LogCommandHandler,
+  ],
 })
 export class AppModule {}

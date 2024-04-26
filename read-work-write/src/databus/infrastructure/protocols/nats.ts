@@ -1,13 +1,14 @@
 import { Readable, Writable } from "node:stream";
 import { Observable, Subject } from "rxjs";
 import { DataBusTypeMap } from "src/databus/domain/databus";
-import { ProtocolAdaptor } from "src/databus/domain/protocol";
-import { ConnectionOptions, NatsConnection, StringCodec, connect, headers } from "nats";
+import { ProtocolAdaptor, ProtocolInjectables } from "src/databus/domain/protocol";
+import { ConnectionOptions, NatsConnection, connect } from "nats";
 import { promises as fs } from "node:fs";
 import * as util from 'node:util';
 import { DataBusErrors } from "../../errors";
 import { NatsReadableStream } from "./nats/input.stream";
 import { NatsWritableStream } from "./nats/output.stream";
+import { Logger } from "@nestjs/common";
 
 //@TODO https://github.com/nats-io/nats.deno/blob/main/jetstream.md
 export class NatsProtocolAdaptor implements ProtocolAdaptor {
@@ -19,8 +20,11 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
         connection: ConnectionOptions,
         subject: string,
     };
+    logger: Logger;
 
-    constructor(private connectionString: string) {}
+    constructor(private connectionString: string, deps: ProtocolInjectables) {
+        this.logger = deps.logger;
+    }
     
     async connect(mode: keyof DataBusTypeMap): Promise<void> {
         let config: string;
@@ -59,7 +63,7 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
         await this.connection.close();
         const err = await this.connection.closed()
         if (err) {
-          console.log('NATS disconnect', err)
+          this.logger.error('NATS disconnect', err)
         }
         this.stream && this.stream.destroy();
         return;
@@ -74,10 +78,10 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
             throw new Error(util.format(DataBusErrors.PROTOCOL_PREMATURE_GETSTREAM, this.constructor.name))
         }
         if (mode == 'input') {
-            this.stream = new NatsReadableStream({}, this.connection, this.config.subject);
+            this.stream = new NatsReadableStream({}, this.connection, this.config.subject, this.logger);
             this.stream.on('close', () => this.disconnect())
         } else {
-            this.stream = new NatsWritableStream({}, this.connection, this.config.subject);
+            this.stream = new NatsWritableStream({}, this.connection, this.config.subject, this.logger);
             this.stream.on('finish', () => this.disconnect());
         }
         return this.stream;

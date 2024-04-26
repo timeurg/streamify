@@ -1,9 +1,14 @@
 import { Readable, Writable } from "node:stream";
 import { DataBusType } from "./databus";
 import { Observable } from "rxjs";
+import { Logger } from "@nestjs/common";
+
+export type ProtocolInjectables = {
+    logger: Logger,
+}
 
 export interface ProtocolAdaptorConstructor {
-    new(connectionString: string);
+    new(connectionString: string, dependenies?: ProtocolInjectables);
 }
 
 export interface ProtocolAdaptor {

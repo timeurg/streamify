@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { Empty, ErrorCode, MsgHdrs, NatsConnection, headers } from "nats";
 import * as crypto from 'node:crypto';
 import { Readable, ReadableOptions } from 'node:stream';
@@ -8,7 +9,7 @@ export class NatsReadableStream extends Readable {
   private batchCount = 0;
   private transactionId: string;
 
-  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string) {    
+  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string, private logger: Logger) {    
     super(options);
     this.transactionId = crypto.randomUUID();
   }
@@ -44,7 +45,7 @@ export class NatsReadableStream extends Readable {
                 data = m.data;
             });
             if (data.length == 0) {
-              console.log('End of transfer')
+              this.logger.log('End of transfer')
                 data = null;
             }
             ready = this.push(data);
@@ -60,7 +61,7 @@ export class NatsReadableStream extends Readable {
                 ready = false;
                 break;
               default:
-                console.log('Unknown NATS error', error)
+                this.logger.error('Unknown NATS error', error)
                 throw error;
             }
         }
