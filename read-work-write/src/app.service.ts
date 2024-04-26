@@ -10,7 +10,7 @@ export class AppService {
         this.unhandledExceptionsBus
             .pipe(takeUntil(this.destroy$))
             .subscribe((exceptionInfo) => {
-                this.logger.error('App Exception:', exceptionInfo);
+                this.logger.error(`App Exception: ${exceptionInfo.exception}`);
                 process.exit(1);
             });
     }

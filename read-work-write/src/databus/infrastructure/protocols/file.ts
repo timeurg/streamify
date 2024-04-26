@@ -1,26 +1,31 @@
 import { DataBus, DataBusStreamMode, DataBusType, DataBusTypeMap } from "src/databus/domain/databus";
 import { constants, promises as fs} from 'node:fs';
-import { dirname } from 'node:path'
-import { OnModuleDestroy } from "@nestjs/common";
+import { dirname, join, normalize, isAbsolute } from 'node:path'
+import { LoggerService, OnModuleDestroy } from "@nestjs/common";
 import { Readable, Writable } from "node:stream";
 import { DataBusConnectStartEvent, DataBusConnectSuccessEvent, DataBusStreamCreatedEvent } from "src/databus/domain/databus.events";
-import { ProtocolAdaptor } from "src/databus/domain/protocol";
+import { ProtocolAdaptor, ProtocolInjectables } from "src/databus/domain/protocol";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 
 export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor  {
     private fileHandle: fs.FileHandle;
     private stream: Readable | Writable;
+    private logger: LoggerService;
 
-    constructor(private connectionString: string) {
+    constructor(private connectionString: string, deps: ProtocolInjectables) {
+        this.logger = deps.logger;
     };
 
     async connect(mode: keyof DataBusTypeMap): Promise<void> {
+        const filename = isAbsolute(this.connectionString) ? this.connectionString : normalize(join(process.cwd(), this.connectionString));
         switch (mode) {
             case "input":
-                this.fileHandle = await fs.open(this.connectionString, 'r');
+                this.logger.verbose(`Reading from ${filename}`);
+                this.fileHandle = await fs.open(filename, 'r');
                 return;
             case "output":
-                this.fileHandle = await fs.open(this.connectionString, 'w');
+                this.logger.verbose(`Writing to ${filename}`);
+                this.fileHandle = await fs.open(filename, 'w');
                 return;
             default:
                 break;

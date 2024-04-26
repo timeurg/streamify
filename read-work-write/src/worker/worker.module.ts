@@ -5,6 +5,7 @@ import { WorkerFactory } from './domain/worker.factory';
 import { WorkerDomainService } from './domain/worker.service';
 import { DataBusModule } from 'src/databus/databus.module';
 import { AssignStreamCommandHandler, GetWorkerCommandHandler, StartTransferCommandHandler } from './application/handlers';
+import { LoggerModule } from 'src/common/logger.module';
 
 const infrastructure: Provider[] = [
 
@@ -23,7 +24,7 @@ const domain = [
 ];
 
 @Module({
-  imports: [DataBusModule, CqrsModule],
+  imports: [LoggerModule, DataBusModule, CqrsModule],
   providers: [...infrastructure, ...application, ...domain],
 })
 export class WorkerModule {}

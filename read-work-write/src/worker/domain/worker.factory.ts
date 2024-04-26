@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 import {
   Worker,
@@ -15,6 +15,7 @@ export type CreateWorkerOptions = Readonly<{
 
 export class WorkerFactory {
   @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
+  @Inject() private logger: Logger;
 
   private instance: Worker;
 
@@ -29,13 +30,14 @@ export class WorkerFactory {
     return this.eventPublisher.mergeObjectContext(
       new WorkerImplement({
         ...options
-      }),
-    );
+      },
+      this.logger,
+    ));
   }
 
   private reconstitute(properties: WorkerProperties): Worker {
     return this.eventPublisher.mergeObjectContext(
-      new WorkerImplement(properties),
+      new WorkerImplement(properties, this.logger),
     );
   }
 }

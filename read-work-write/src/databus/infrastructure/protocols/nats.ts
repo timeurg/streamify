@@ -8,7 +8,7 @@ import * as util from 'node:util';
 import { DataBusErrors } from "../../errors";
 import { NatsReadableStream } from "./nats/input.stream";
 import { NatsWritableStream } from "./nats/output.stream";
-import { Logger } from "@nestjs/common";
+import { LoggerService } from "@nestjs/common";
 
 //@TODO https://github.com/nats-io/nats.deno/blob/main/jetstream.md
 export class NatsProtocolAdaptor implements ProtocolAdaptor {
@@ -20,7 +20,7 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
         connection: ConnectionOptions,
         subject: string,
     };
-    logger: Logger;
+    private logger: LoggerService;
 
     constructor(private connectionString: string, deps: ProtocolInjectables) {
         this.logger = deps.logger;
@@ -49,7 +49,8 @@ export class NatsProtocolAdaptor implements ProtocolAdaptor {
         }
         
         //@TODO check config
-        this.connection = await connect(this.config.connection);
+        this.connection = await connect(this.config.connection); 
+        
         this.state$.next('READY');
         return;
     }

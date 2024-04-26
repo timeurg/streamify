@@ -1,4 +1,4 @@
-import { Logger } from "@nestjs/common";
+import { LoggerService } from "@nestjs/common";
 import { Empty, ErrorCode, MsgHdrs, NatsConnection, headers } from "nats";
 import * as crypto from 'node:crypto';
 import { Readable, ReadableOptions } from 'node:stream';
@@ -9,7 +9,7 @@ export class NatsReadableStream extends Readable {
   private batchCount = 0;
   private transactionId: string;
 
-  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string, private logger: Logger) {    
+  constructor(options: ReadableOptions, private connection: NatsConnection, private subject: string, private logger: LoggerService) {    
     super(options);
     this.transactionId = crypto.randomUUID();
   }

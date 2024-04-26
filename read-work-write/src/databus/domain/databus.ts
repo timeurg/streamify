@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 import { AggregateRoot } from '@nestjs/cqrs';
 import { Readable, Writable } from 'stream';
 import { InjectionToken } from '../application/injection-tokens';
@@ -41,10 +41,12 @@ export class DataBus extends AggregateRoot implements DataBusInterface, DataBusS
   protected connectionString: string;
   public readonly mode: DataBusType;
   private stream: Readable | Writable;
+  
 
   constructor(
     properties: DataBusProperties, 
-    private transport: ProtocolAdaptor
+    private transport: ProtocolAdaptor,
+    private logger: LoggerService,
   ) {
     super();
     Object.assign(this, properties);
@@ -59,7 +61,14 @@ export class DataBus extends AggregateRoot implements DataBusInterface, DataBusS
   async connect(): Promise<void> {
     this.autoCommit = true;
     this.apply(new DataBusConnectStartEvent(this));
-    await this.transport.connect(this.mode);
+    try {
+      await this.transport.connect(this.mode);  
+    } catch (error) {
+      this.logger.error(error);
+      // UnhandledExceptionBus doesn't catch anything for some reason, so
+      process.exit(1);
+    }
+    
     this.apply(new DataBusConnectSuccessEvent(this));
     return;
   };

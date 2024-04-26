@@ -1,11 +1,8 @@
+import { Injectable, LoggerService } from '@nestjs/common';
 import { AggregateRoot } from '@nestjs/cqrs';
-import { WorkerConnectStarted, WorkerReadyEvent } from './worker.events';
-import { DataBus, DataBusType, DataBusTypeMap } from 'src/databus/domain/databus';
-import { DataBusFactory } from 'src/databus/domain/databus.factory';
-import { Inject, Injectable } from '@nestjs/common';
-import { DataBusDomainService } from 'src/databus/domain/databus.service';
-import { InjectionToken } from 'src/databus/application/injection-tokens';
 import { Readable, Writable } from 'node:stream';
+import { DataBusType, DataBusTypeMap } from 'src/databus/domain/databus';
+import { WorkerConnectStarted, WorkerReadyEvent } from './worker.events';
 
 export type WorkerEssentialProperties = Readonly<
   Required<{
@@ -37,9 +34,10 @@ export class WorkerImplement extends AggregateRoot implements Worker {
     private input_: Readable;
     private output_: Writable;
 
-    constructor(properties: WorkerProperties) {
+    constructor(properties: WorkerProperties, private logger: LoggerService) {
       super();
       Object.assign(this, properties);
+      this.logger.verbose(`Starting worker: ${properties.input} ${properties.output} ${properties.workload}`);
       this.autoCommit = true;
     }
 

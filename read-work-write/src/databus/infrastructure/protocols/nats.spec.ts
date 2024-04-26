@@ -6,23 +6,23 @@ import { JSONCodec, NatsConnection, StringCodec } from "nats";
 import { Subject, firstValueFrom, takeUntil, timeout } from "rxjs";
 import { Readable, Writable } from "node:stream";
 import { getConfig, natsHelloWorld, natsTestRequest, natsTestSubscribe } from "./nats/test-helpers";
+import { deps } from "./helpers/test.dependencies";
+import { NatsReadableStream } from "./nats/input.stream";
+import { NatsWritableStream } from "./nats/output.stream";
 
-let options, config = '', subject = 'test' + new Date().getTime(), 
+let options, subject = '', config = '', 
     testClient: NatsConnection, sc = StringCodec(), jc = JSONCodec(), exit$ = new Subject<void>(); 
 describe('NatsProtocolAdaptor', () => {
+  //@TODO test new (FILENAME) initialization
     beforeAll(async () => {
         const port = await getNatsPort();
+        subject = crypto.randomUUID();
         options = {
             port
         }
-        config = await getConfig(options, subject)
     });
     afterAll(async () => {
       exit$.next();
-      await Promise.all([
-          fs.unlink(config),
-          testClient && testClient.close(),
-      ]);
     })
     describe('testbed', () => {
       it('should have a NATS server for testing', async () => {
@@ -32,19 +32,30 @@ describe('NatsProtocolAdaptor', () => {
     });
     describe('input mode', () => {
       describe('connect', () => {
-        it('should connect to a running NATS server', async () => {
-          const protocol = new NatsProtocolAdaptor(config);
+        it('should connect with [port/subject] initialization string', async () => {
+          const protocol = new NatsProtocolAdaptor(`${options.port}/${crypto.randomUUID()}`, deps);
           const state$ = firstValueFrom(protocol.state().pipe(takeUntil(exit$), timeout(1000)));
           await protocol.connect('input');
           const state = await state$;
           protocol.disconnect();
           expect(state).toEqual('READY');
         });
+        it('should connect with [filename] initialization string', async () => {
+          config = await getConfig(options, crypto.randomUUID());
+          const protocol = new NatsProtocolAdaptor(config, deps);
+          const state$ = firstValueFrom(protocol.state().pipe(takeUntil(exit$), timeout(1000)));
+          await protocol.connect('input');
+          const state = await state$;
+          protocol.disconnect();
+          await fs.unlink(config)
+          expect(state).toEqual('READY');
+        });
       });
       describe('getStream', () => {
         let protocol;
         beforeEach(async () => {
-          protocol = new NatsProtocolAdaptor(config);
+          subject = crypto.randomUUID();
+          protocol = new NatsProtocolAdaptor(`${options.port}/${subject}`, deps);
           await protocol.connect('input');
         })
         afterEach(() => {
@@ -82,7 +93,7 @@ describe('NatsProtocolAdaptor', () => {
     describe('output mode', () => {
       describe('connect', () => {
         it('should connect to a running NATS server', async () => {
-          const protocol = new NatsProtocolAdaptor(config);
+          const protocol = new NatsProtocolAdaptor(`${options.port}/${crypto.randomUUID()}`, deps);
           const state$ = firstValueFrom(protocol.state().pipe(takeUntil(exit$), timeout(1000)));
           await protocol.connect('output');
           const state = await state$;
@@ -93,7 +104,8 @@ describe('NatsProtocolAdaptor', () => {
       describe('getStream', () => {
         let protocol;
         beforeEach(async () => {
-          protocol = new NatsProtocolAdaptor(config);
+          subject = crypto.randomUUID();
+          protocol = new NatsProtocolAdaptor(`${options.port}/${subject}`, deps);
           await protocol.connect('output');
         })
         afterEach(() => {
@@ -129,9 +141,11 @@ describe('NatsProtocolAdaptor', () => {
       test('data written to NatsProtocolAdaptor in output mode can be read from NatsProtocolAdaptor in input mode', async () => {
         const data1 = 'A stream is an abstract interface for working with streaming data in Node.js. The node:stream module provides an API for implementing the stream interface.',
               data2 = 'There are many stream objects provided by Node.js. For instance, a request to an HTTP server and process.stdout are both stream instances.',
-              output = new NatsProtocolAdaptor(config), input = new NatsProtocolAdaptor(config);
+              subject = crypto.randomUUID(),
+              output = new NatsProtocolAdaptor(`${options.port}/${subject}`, deps), 
+              input = new NatsProtocolAdaptor(`${options.port}/${subject}`, deps);
         await Promise.all([output.connect('output'), input.connect('input')]);
-        const sin = input.getStream('input') as Readable, sout = output.getStream('output') as Writable;
+        const sin = input.getStream('input') as NatsReadableStream, sout = output.getStream('output') as NatsWritableStream;
         sout.write(data1);
         await new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
         sout.write("\n");

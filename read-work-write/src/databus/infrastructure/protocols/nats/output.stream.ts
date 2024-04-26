@@ -1,8 +1,7 @@
-import { Logger } from "@nestjs/common";
-import { Empty, ErrorCode, MsgHdrs, NatsConnection, StringCodec, Subscription, headers } from "nats";
-import { config } from "node:process";
-import { WritableOptions, Writable, getDefaultHighWaterMark } from 'node:stream';
-import { BehaviorSubject, Subject, lastValueFrom } from "rxjs";
+import { LoggerService } from "@nestjs/common";
+import { MsgHdrs, NatsConnection, StringCodec, Subscription, headers } from "nats";
+import { Writable, WritableOptions } from 'node:stream';
+import { BehaviorSubject } from "rxjs";
 import { runTimeConfiguration } from "src/config";
 
 const sc = StringCodec();
@@ -20,7 +19,7 @@ export class NatsWritableStream extends Writable {
 
   
 
-  constructor(options: WritableOptions, private connection: NatsConnection, private subject: string, private logger: Logger) {
+  constructor(options: WritableOptions, private connection: NatsConnection, private subject: string, private logger: LoggerService) {
     super(Object.assign(options, {
       highWaterMark: runTimeConfiguration.NatsOutputHighWaterMark,
     }));
@@ -50,11 +49,16 @@ export class NatsWritableStream extends Writable {
             if (batchCount == this.batchCount) { 
               //synced request, provide pending data        
               const chunk = this.currentChunk.getValue();
-              if (chunk) {
+              if (chunk !== undefined) {
                 m.respond(chunk instanceof Uint8Array ? chunk : sc.encode(chunk));
                 this.logger.verbose(`Batch ${this.batchCount} sent`);
+                //end of transfer
                 if (chunk.length == 0) {
-                  this.callback(); //end of transfer
+                  this.logger.verbose('End of transfer');
+                  this.subscription.drain()
+                    .then(() => this.subscription.unsubscribe())
+                    .then(() => this.callback());
+                  
                 }
               }
             } else if (batchCount == this.batchCount + 1) { 
@@ -98,17 +102,14 @@ export class NatsWritableStream extends Writable {
     this.logger.verbose(`Queued ${(chunks.length * 65536 / 1024 / 1024)} Mb, batch: ${this.batchCount}`);
     this.subLoop();
     this.currentCallback.next(callback);
-    this.currentChunk.next(chunks.map(c => c.chunk).join(''));
+    this.currentChunk.next(Buffer.concat(chunks.map(c => c.chunk)));
   }
 
   _final(callback: (error?: Error) => void): void {
     this.logger.log(`Transaction ${this.transactionId} ended`);
     this.callback();
-    this.currentCallback.complete();
-    this.currentChunk.complete();
-    this.subscription.drain()
-      .then(() => this.subscription.unsubscribe())
-      .then(() => callback());
+    this.currentChunk.next('');
+    this.currentCallback.next(callback);
   }
 
   callback(e?) {

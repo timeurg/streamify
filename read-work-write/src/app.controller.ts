@@ -34,7 +34,7 @@ export class AppDefaultCommand extends CommandRunner {
   }
 
   @Option({
-    flags: '--verbose [verbose]',
+    flags: '--verbose',
     description: 'Verbose output',
     defaultValue: false,
   })

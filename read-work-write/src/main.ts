@@ -16,7 +16,7 @@ async function bootstrap() {
     logger.log('SIGTERM exit');
     process.exit();
   });
-  process.on('exit', () => logger.log('Exited', new Date()));
+  process.on('exit', () => logger.log(`Exited ${new Date()}`));
 }
 
 bootstrap();
