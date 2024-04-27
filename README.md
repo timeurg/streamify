@@ -37,7 +37,10 @@ const processData = (data) => {
 
 Объем отправляемых в конкретном запросе данных регулируется параметром инициализации [highWaterMark](https://nodejs.org/api/stream.html#new-streamwritableoptions) у выходного потока. Для подбора оптимального значения для конкретной передачи реализовано чтение этого параметра из переменной окружения `NATS_OUT_HWM`. При тестировании скорость передачи быстро упирается в конфигурацию max payload у NATS. 
 
-С учетом вышеперечисленного, механизма специального замедления транспортов/обработки не реализовывалось.
+В базовом `docker.compose.yml` применено стандартное замедление, чтоб поиграть:
+
+- `docker compose -f "docker.compose.yml" up nats reader -d`
+- Запуск с 5 секундным slow `docker run --rm -e SLOW=5000 -v ${PWD}/temp:/home/node/temp --net=host writer nats:4222/file-transfer ../temp/slow-copy.txt -w slow --verbose`
  
 
 # Дополнительно (по возможности):
@@ -83,9 +86,9 @@ CLI приложение со следующим синтаксом:
   - настроить HighWaterMark `docker run --rm -e NATS_OUT_HWM=800 -v ${PWD}/temp:/home/node/temp --net=host reader ../temp/sample.txt nats:4222/file-transfer` (или, например, направить `/dev/urandom` на вход)
 - проверить что ничего не потерялось при передаче `md5sum temp/sample.txt temp/copy-over-nats.txt`
 - разное:
-  - аналог cp: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
-  - аналог cat: `docker run --rm -v ${PWD}:/home/node/temp reader ../temp/sample.txt`
-  - аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}:/home/node/temp reader
+  - аналог cp: `docker run --rm -v ${PWD}/temp:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
+  - аналог cat: `docker run --rm -v ${PWD}/temp:/home/node/temp reader ../temp/sample.txt`
+  - аналог sed (добавить обработчиков `-w` по вкусу): `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}/temp:/home/node/temp reader
  std ../temp/doc2`
 
 

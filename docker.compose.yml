@@ -26,7 +26,7 @@ services:
     environment:
       NODE_ENV: production
     network_mode: host
-    command: ["--verbose", "nats:4222/file-transfer", "../temp/copy-over-nats.txt"]
+    command: ["--verbose", "nats:4222/file-transfer", "../temp/copy-over-nats.txt", "-w slow"]
   nats:
     image: nats:2.10.14-alpine3.19 # https://github.com/nats-io/nats-docker/blob/main/2.10.x/alpine3.19/
     ports:

@@ -15,7 +15,7 @@ services:
       DEBUG: '*'   
     network_mode: host
     # command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "../temp/copy.txt"]
-    command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "nats:4222/file-transfer"]
+    command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "nats:4222/file-transfer", "--verbose"]
   writer:
     image: writer-dev
     build:
@@ -29,4 +29,4 @@ services:
       NODE_ENV: development
       DEBUG: '*' 
     network_mode: host
-    command: ["run", "start:dev", "--", "--", "nats:4222/file-transfer", "../temp/copy-over-nats.txt"]
+    command: ["run", "start:dev", "--", "--", "nats:4222/file-transfer", "../temp/copy-over-nats-debug.txt", "-w slow", "--verbose"]

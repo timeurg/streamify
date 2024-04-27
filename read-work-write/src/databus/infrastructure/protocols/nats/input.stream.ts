@@ -36,9 +36,6 @@ export class NatsReadableStream extends Readable {
       this.inFlight = true;
     }
     let ready = true;
-    if (this.batchCount !== 0) {
-      this.batchCount++;
-    }
     while (
       ready &&
       !this.connection.isClosed() &&
