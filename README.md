@@ -65,17 +65,19 @@ nats(mode=object,hwm=32):demo.nats.io:4442,demo.nats.io:4222/file-transfer
  -w slow:500-5000
 
 5. connectionString передается слишком глубоко по цепочке вызовов, по уму уже в контроллере юзеринпут должен преобразовываться в структуры данных, используемые в программе. Адаптеры должны четко отображать свои опции, явно указывая парсинг connectionString -> ConnectionOptions:
+```typescript
 export interface ProtocolAdaptor<ConnectionOptions> {
   parseOptions(connectionString: string): Promise<ConnectionOptions>;
   connect(mode: DataBusType, options: ConnectionOptions): Promise<void>;
 ...
 }
+```
 
-6. Модуль reader лишний
+7. Модуль reader лишний
 
-7. После тестов контейнер с NATS не гасится. Плюс может быть проблемой, что в CI среде нет докера (или доступа к нему).
+8. После тестов контейнер с NATS не гасится. Плюс может быть проблемой, что в CI среде нет докера (или доступа к нему).
 
-8. Все тесты позитивные, негативных сценариев не описано
+9. Все тесты позитивные, негативных сценариев не описано
 
 - error handling
 - proper logging
