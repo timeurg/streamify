@@ -1,6 +1,7 @@
 # Streamify
 
-`streamify` utilises Node Streams and Transformers to build versatile Node.js-based application infrastructures designed for efficient data transfer and processing utilising microservice pipe-n-filters approach. Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC. 
+`streamify` utilises Node Streams and Transformers to build versatile microservice application infrastructures designed for efficient data transfer and processing utilising pipe-n-filters approach. 
+Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC. 
 The project emphasizes efficient handling of large data volumes and includes Docker support for easy deployment.
 
 # What's next
