@@ -22,7 +22,7 @@ export class Slow extends Transform {
           this.logger.log(`Slowed response by ${slow} ms`);
           await callback(null, chunk);
           resolve();
-        }, runTimeConfiguration.SlowValue);
+        }, slow);
       });
     };
     processData(chunk);
