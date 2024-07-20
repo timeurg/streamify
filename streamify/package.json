@@ -1,10 +1,16 @@
 {
-  "name": "streamify",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "name": "node-streamify",
+  "version": "0.0.3",
+  "description": "Stream and transform data using NodeJs native streams",
+  "author": "timeurg@gmail.com",
+  "license": "MIT",
+  "bin": {
+    "streamify": "bin/streamify.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "nest": "nest",
     "build": "nest build",

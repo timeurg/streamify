@@ -4,6 +4,14 @@
 Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC. 
 The project emphasizes efficient handling of large data volumes and includes Docker support for easy deployment.
 
+# Installation
+
+`npm i -g node-streamify` then call `streamify` from command line
+
+If you have NATS up and running try `streamify FILENAME nats:4222/file-transfer` to make a file available for download.
+
+You can then download it (on another machine or tty) using `streamify nats:4222/file-transfer copy.txt`.
+
 # What's next
 
 Next milestone is integrating [csv capabilities](https://github.com/adaltas/node-csv/blob/master/packages/stream-transform/README.md) and pg [queries](https://www.npmjs.com/package/pg-query-stream) and [writes](https://github.com/brianc/node-pg-copy-streams). 
