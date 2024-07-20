@@ -4,7 +4,7 @@ services:
   reader:
     image: nats-reader
     build:
-      context: ../../read-work-write
+      context: ../../streamify
       dockerfile: ./Dockerfile    
     depends_on:
       - nats   
@@ -17,7 +17,7 @@ services:
   writer:
     image: nats-writer
     build:
-      context: ../../read-work-write
+      context: ../../streamify
       dockerfile: ./Dockerfile   
     depends_on:
       - nats

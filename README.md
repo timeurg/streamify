@@ -38,7 +38,7 @@ Next milestone is integrating [csv capabilities](https://github.com/adaltas/node
   - `FILE | streamify std RESULTFILE`
   - `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 10K | docker run -i --rm -v ${PWD}/temp:/home/node/temp reader std ../temp/doc2`
 ## Debug
-- local `cd read-work-write && npm run start:dev -- -- [[-w worker]] <source> [target]`
+- local `cd streamify && npm run start:dev -- -- [[-w worker]] <source> [target]`
   - `npm run start:dev -- -- ../temp/sample.txt nats:4222/file-transfer` - reader
 - docker `docker compose -f "docker.compose.debug.yml" up -d --build`
 ## Misc

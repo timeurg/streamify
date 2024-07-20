@@ -4,11 +4,11 @@ services:
   reader:
     image: nats-reader-dev
     build:
-      context: ../../read-work-write
+      context: ../../streamify
       dockerfile: ./Dockerfile
       target: development       
     volumes:
-      - ./../../read-work-write:/home/node/app
+      - ./../../streamify:/home/node/app
       - ./../../temp:/home/node/temp
     environment:
       NODE_ENV: development
@@ -19,11 +19,11 @@ services:
   writer:
     image: nats-writer-dev
     build:
-      context: ../../read-work-write
+      context: ../../streamify
       dockerfile: ./Dockerfile
       target: development       
     volumes:
-      - ./../../read-work-write:/home/node/app
+      - ./../../streamify:/home/node/app
       - ./../../temp:/home/node/temp
     environment:
       NODE_ENV: development
