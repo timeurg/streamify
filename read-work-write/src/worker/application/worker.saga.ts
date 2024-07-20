@@ -22,10 +22,27 @@ import {
   DataBusConnectSuccessEvent,
   DataBusStreamCreatedEvent,
 } from 'src/databus/domain/databus.events';
-import { AssignStreamCommand, StartTransferCommand } from './commands';
+import { AssignStreamCommand, GetWorkerCommand, StartTransferCommand } from './commands';
+import { AppStartedEvent } from 'src/common/events';
 
 @Injectable()
 export class WorkerSagas {
+  @Saga()
+  start = (events$: Observable<any>): Observable<ICommand> => {
+    return events$.pipe(
+      ofType(AppStartedEvent),
+      map(
+        (event) =>
+          new GetWorkerCommand(
+            event.input,
+            event.output,
+            event.workload,
+            event.options,
+          ),
+      ),
+    );
+  };
+  
   @Saga()
   connect = (events$: Observable<any>): Observable<ICommand> => {
     return events$.pipe(

@@ -1,11 +1,10 @@
 import { Logger, Module } from '@nestjs/common';
 import { AppDefaultCommand } from './app.controller';
 import { CqrsModule } from '@nestjs/cqrs';
-import { ReaderModule } from './reader/reader.module';
 import { AppService } from './app.service';
-
 import { CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs';
 import { LoggerModule } from './common/logger.module';
+import { WorkerModule } from './worker/worker.module';
 
 export class LogCommand implements ICommand {
   constructor(public event) {}
@@ -24,7 +23,7 @@ export class LogCommandHandler implements ICommandHandler<LogCommand, void> {
 }
 
 @Module({
-  imports: [LoggerModule, ReaderModule, CqrsModule.forRoot()],
+  imports: [LoggerModule, WorkerModule, CqrsModule.forRoot()],
   providers: [AppDefaultCommand, AppService, LogCommandHandler],
 })
 export class AppModule {}

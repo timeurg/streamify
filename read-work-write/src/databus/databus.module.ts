@@ -3,10 +3,8 @@ import {
   Logger,
   Module,
   Provider,
-  Scope,
 } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { DataBusSagas } from './application/databus.saga';
 import { DataBusFactory } from './domain/databus.factory';
 import { DataBusDomainService } from './domain/databus.service';
 import { InjectionToken } from 'src/databus/application/injection-tokens';
@@ -56,7 +54,6 @@ const infrastructure: Provider[] = [
 const application = [
   GetDataBusCommandHandler,
   GetDataBusStreamCommandHandler,
-  DataBusSagas,
 ];
 
 const domain = [DataBusDomainService, DataBusFactory];
