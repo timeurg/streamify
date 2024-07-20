@@ -1,8 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 import { DataBus, DataBusProperties, DataBusType } from './databus';
-import { InjectionToken } from '../application/injection-tokens';
-import { ProtocolAdaptorFactory } from './protocol';
+import { InjectionToken, ProtocolAdaptorFactory } from 'src/protocol/protocol';
 
 export type CreateDataBusOptions = Readonly<{
   connectionString: string;

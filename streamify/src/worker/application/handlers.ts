@@ -6,7 +6,6 @@ import {
   StartTransferCommand,
 } from './commands';
 import { CreateWorkerOptions, WorkerFactory } from '../domain/worker.factory';
-import { WorkerErrors } from '../errors';
 
 @CommandHandler(GetWorkerCommand)
 export class GetWorkerCommandHandler

@@ -4,10 +4,7 @@ import { isAbsolute, join, normalize } from 'node:path';
 import { Readable, Writable } from 'node:stream';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { DataBusTypeMap } from 'src/databus/domain/databus';
-import {
-  ProtocolAdaptor,
-  ProtocolInjectables,
-} from 'src/databus/domain/protocol';
+import { ProtocolAdaptor, ProtocolInjectables } from '../protocol';
 
 export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor {
   private fileHandle: fs.FileHandle;
@@ -29,10 +26,12 @@ export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor {
       case 'input':
         this.logger.verbose(`Reading from ${filename}`);
         this.fileHandle = await fs.open(filename, 'r');
+        this.stream = this.fileHandle.createReadStream();
         return;
       case 'output':
         this.logger.verbose(`Writing to ${filename}`);
         this.fileHandle = await fs.open(filename, 'w');
+        this.stream = this.fileHandle.createWriteStream();
         return;
       default:
         break;
@@ -40,20 +39,7 @@ export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor {
     throw new Error('FileProtocolAdaptor: file open failed.');
   }
 
-  getStream(mode: keyof DataBusTypeMap): Readable | Writable {
-    if (!this.fileHandle) {
-      throw new Error('FileProtocolAdaptor: getting stream before connect.');
-    }
-    switch (mode) {
-      case 'input':
-        this.stream = this.fileHandle.createReadStream();
-        break;
-      case 'output':
-        this.stream = this.fileHandle.createWriteStream();
-        break;
-      default:
-        throw new Error('FileDataBus unknown mode');
-    }
+  getStream(): Readable | Writable {
     return this.stream;
   }
 

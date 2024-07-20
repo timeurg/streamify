@@ -1,8 +1,7 @@
 import { Inject, Logger } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 import { Worker, WorkerImplement, WorkerProperties } from './worker';
-import { InjectionToken } from '../application/injection-tokens';
-import { TransformerFactory } from './transformers';
+import { InjectionToken, TransformerFactory } from 'src/transformer/transformers';
 
 export type CreateWorkerOptions = Readonly<{
   input: string;
@@ -14,8 +13,7 @@ export type CreateWorkerOptions = Readonly<{
 export class WorkerFactory {
   @Inject(EventPublisher) private readonly eventPublisher: EventPublisher;
   @Inject() private logger: Logger;
-  @Inject(InjectionToken.Tranformer_FACTORY)
-  private transformerFactory: TransformerFactory;
+  @Inject(InjectionToken.Tranformer_FACTORY) private transformerFactory: TransformerFactory;
 
   private instance: Worker;
 

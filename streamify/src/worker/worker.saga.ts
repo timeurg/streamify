@@ -12,7 +12,7 @@ import {
 import {
   WorkerConnectStarted,
   WorkerReadyEvent,
-} from '../domain/worker.events';
+} from './domain/worker.events';
 import {
   GetDataBusCommand,
   GetDataBusStreamCommand,
@@ -22,7 +22,7 @@ import {
   DataBusConnectSuccessEvent,
   DataBusStreamCreatedEvent,
 } from 'src/databus/domain/databus.events';
-import { AssignStreamCommand, GetWorkerCommand, StartTransferCommand } from './commands';
+import { AssignStreamCommand, GetWorkerCommand, StartTransferCommand } from './application/commands';
 import { AppStartedEvent } from 'src/common/events';
 
 @Injectable()

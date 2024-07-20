@@ -45,7 +45,7 @@ export class WorkerImplement extends AggregateRoot implements Worker {
       this.workload = [];
     }
     this.logger.verbose(
-      `Starting worker: ${properties.input} ${properties.output} ${properties.workload}`,
+      `Starting worker: ${properties.input} ${properties.output} ${JSON.stringify(properties.workload.map(i => i.constructor.name))}`,
     );
     this.autoCommit = true;
   }

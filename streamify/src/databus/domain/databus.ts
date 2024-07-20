@@ -6,7 +6,7 @@ import {
   DataBusConnectSuccessEvent,
   DataBusStreamCreatedEvent,
 } from './databus.events';
-import { ProtocolAdaptor } from './protocol';
+import { ProtocolAdaptor } from 'src/protocol/protocol';
 
 export interface DataBusTypeMap {
   input: Readable;
@@ -52,7 +52,7 @@ export class DataBus
   }
 
   getStream(): Readable | Writable {
-    this.stream = this.transport.getStream(this.mode);
+    this.stream = this.transport.getStream();
     this.apply(new DataBusStreamCreatedEvent(this, this.stream));
     return this.stream;
   }

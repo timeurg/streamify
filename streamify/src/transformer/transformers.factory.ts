@@ -1,8 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import * as zlib from 'node:zlib';
 import { Transform } from 'stream';
-import { TransformerFactory } from '../domain/transformers';
-import { Slow } from './slow.transformer';
+import { TransformerErrors, TransformerFactory } from './transformers';
+import * as util from 'node:util';
+import { Slow } from './impl/slow.transformer';
 
 export class TransformerFactoryImpl implements TransformerFactory {
   @Inject() private logger: Logger;
@@ -25,6 +26,12 @@ export class TransformerFactoryImpl implements TransformerFactory {
         }
         return new Slow(from, to, {}, this.logger);
       default:
+        throw new Error(
+          util.format(
+            TransformerErrors.UNKNOWN_CALL_STRING,
+            description,
+          ),
+        );
         break;
     }
   }
