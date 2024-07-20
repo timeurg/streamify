@@ -1,6 +1,6 @@
 {
   "name": "node-streamify",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "description": "Stream and transform data using NodeJs native streams",
   "author": "timeurg@gmail.com",
   "license": "MIT",
