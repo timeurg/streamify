@@ -4,6 +4,8 @@ import { runTimeConfiguration } from 'src/config';
 
 export class Slow extends Transform {
   constructor(
+    private from: number, 
+    private to: number,
     opts: TransformOptions,
     private logger: LoggerService,
   ) {
@@ -16,11 +18,11 @@ export class Slow extends Transform {
   ): void {
     const processData = (data) => {
       const slow =
-        runTimeConfiguration.SlowValue + Math.floor(Math.random() * 500);
+        this.to + Math.floor(Math.random() * (this.from - this.to)) - this.from;
       return new Promise<void>((resolve) => {
         setTimeout(async () => {
           this.logger.log(`Slowed response by ${slow} ms`);
-          await callback(null, chunk);
+          await callback(null, data);
           resolve();
         }, slow);
       });

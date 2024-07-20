@@ -1,15 +1,15 @@
-name: 'read-n-write-debug'
+name: 'streamify-nats-debug'
 
 services:
   reader:
-    image: reader-dev
+    image: nats-reader-dev
     build:
-      context: read-work-write
+      context: ../../read-work-write
       dockerfile: ./Dockerfile
       target: development       
     volumes:
-      - ./read-work-write:/home/node/app
-      - ./temp:/home/node/temp
+      - ./../../read-work-write:/home/node/app
+      - ./../../temp:/home/node/temp
     environment:
       NODE_ENV: development
       DEBUG: '*'   
@@ -17,14 +17,14 @@ services:
     # command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "../temp/copy.txt"]
     command: ["run", "start:debug", "--", "--", "../temp/sample.txt", "nats:4222/file-transfer", "--verbose"]
   writer:
-    image: writer-dev
+    image: nats-writer-dev
     build:
-      context: read-work-write
+      context: ../../read-work-write
       dockerfile: ./Dockerfile
       target: development       
     volumes:
-      - ./read-work-write:/home/node/app
-      - ./temp:/home/node/temp
+      - ./../../read-work-write:/home/node/app
+      - ./../../temp:/home/node/temp
     environment:
       NODE_ENV: development
       DEBUG: '*' 

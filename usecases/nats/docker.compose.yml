@@ -1,28 +1,28 @@
-name: 'read-n-write'
+name: 'streamify-nats'
 
 services:
   reader:
-    image: reader
+    image: nats-reader
     build:
-      context: read-work-write
+      context: ../../read-work-write
       dockerfile: ./Dockerfile    
     depends_on:
       - nats   
     volumes:
-      - ./temp:/home/node/temp
+      - ./../../temp:/home/node/temp
     network_mode: host
     environment:
       NODE_ENV: production
     command: ["--verbose", "../temp/sample.txt", "nats:4222/file-transfer"]
   writer:
-    image: writer
+    image: nats-writer
     build:
-      context: read-work-write
+      context: ../../read-work-write
       dockerfile: ./Dockerfile   
     depends_on:
       - nats
     volumes:
-      - ./temp:/home/node/temp
+      - ./../../temp:/home/node/temp
     environment:
       NODE_ENV: production
     network_mode: host
