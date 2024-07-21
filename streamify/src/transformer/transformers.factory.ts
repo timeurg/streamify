@@ -4,6 +4,9 @@ import { Transform } from 'stream';
 import { TransformerErrors, TransformerFactory } from './transformers';
 import * as util from 'node:util';
 import { Slow } from './impl/slow.transformer';
+import { Aggregate } from './impl/aggregate';
+import { Arr2ObjHeader } from './impl/array2obj-header';
+import { ToJSON } from './impl/toJSON';
 
 export class TransformerFactoryImpl implements TransformerFactory {
   @Inject() private logger: Logger;
@@ -14,9 +17,15 @@ export class TransformerFactoryImpl implements TransformerFactory {
       case 'gzip':
         this.logger.verbose('Creating gzip job');
         return zlib.createGzip();
+      case 'aggregate':
+        return new Aggregate(argstr == '' ? undefined : +argstr, {}, this.logger);
+      case 'row2obj':
+        return new Arr2ObjHeader({}, this.logger);
+      case 'toJSON':
+        return new ToJSON({}, this.logger);
       case 'slow':
-        this.logger.verbose('Creating slow job');
         let [from, to] = (argstr || '').split('-').map(i => parseInt(i) || 0);
+        this.logger.verbose(`Slowing by ${from}-${to} ms`);
         if (from === undefined) {
           from = to = 0;
         }
