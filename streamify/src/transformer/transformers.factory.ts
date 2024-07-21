@@ -7,6 +7,7 @@ import { Slow } from './impl/slow.transformer';
 import { Aggregate } from './impl/aggregate';
 import { Arr2ObjHeader } from './impl/array2obj-header';
 import { ToJSON } from './impl/toJSON';
+import { Extract } from './impl/extract';
 
 export class TransformerFactoryImpl implements TransformerFactory {
   @Inject() private logger: Logger;
@@ -19,6 +20,8 @@ export class TransformerFactoryImpl implements TransformerFactory {
         return zlib.createGzip();
       case 'aggregate':
         return new Aggregate(argstr == '' ? undefined : +argstr, {}, this.logger);
+      case 'extract':
+        return new Extract(argstr, {}, this.logger);
       case 'row2obj':
         return new Arr2ObjHeader({}, this.logger);
       case 'toJSON':

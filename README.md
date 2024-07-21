@@ -23,6 +23,7 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
 - `-w --worker` a (chain of) workload(s) implementing `{ Transform } from 'node:stream'` interface. Optional, multiple choice, order matters.
   Built-in workers include:
   - `-w row2obj` (object mode) converts incoming arrays to objects with properties described in first entry (header)
+  - `-w extract:PROPERTY` (object mode) passes specified property to next worker
   - `-w aggregate` aggregates input up until an (optional) threshhold. A call without parameters will aggregate input until source runs out then pass it to next worker. Invoking `-w aggregate:4` will split input into a stream of arrays of length 4.
   - `-w toJSON` useful for switching from object mode
   - `-w gzip`, which maps to `require('node:zlib').createGzip()`

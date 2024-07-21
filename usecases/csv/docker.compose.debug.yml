@@ -24,7 +24,8 @@ services:
       "-w row2obj",
       "-w aggregate",
       "-m generate-a-song",
-      "-w toJSON",
-      "../temp/result.json", 
+      "-w extract:prompt",
+      #"-m some-song-generation-api",
+      "../temp/last-prompt.txt", 
       "--verbose"
       ]

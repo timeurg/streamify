@@ -30,7 +30,7 @@ class GenerateSong extends Transform {
         if (mutations.length === 0) {
             mutations.push(random_progression())
         }
-        const lines = [];
+        let lines = [];
         let songname = genre['Progression Quality'];
         while (lines.length < 4 && (!(lines.length > 16) || Math.random() > 0.1)) {
             const roll = Math.random();
@@ -67,11 +67,14 @@ class GenerateSong extends Transform {
         const scale = Object.keys(scales)[Math.floor(Math.random() * Object.keys(scales).length)];
         console.log('scale', scale)
         songname = `${songname} in ${scale}`;
+        lines = lines.map(line => line.map(i => scales[scale][+i - 1]))
+            .map((v, i, a) => (i % 4 == 0) ? [a[i], a[i + 1], a[i + 2], a[i + 3]].filter(i => i) : undefined)
+            .filter(i => i);
+        const prompt = songname + " with chords that go roughly like this:\n\n" + lines.map(i => i.join("\n")).join("\n\n")
         callback(null, ({
             songname,
-            lines: lines.map(line => line.map(i => scales[scale][+i - 1]))
-                .map((v, i, a) => (i % 4 == 0) ? [a[i], a[i + 1], a[i + 2], a[i + 3]].filter(i => i) : undefined)
-                .filter(i => i),
+            prompt,
+            lines,
         }));
     }
 }
