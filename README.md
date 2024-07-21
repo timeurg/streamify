@@ -22,6 +22,9 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
   - `docker run --rm IMAGE` if you have a docker image configured
 - `-w --worker` a (chain of) workload(s) implementing `{ Transform } from 'node:stream'` interface. Optional, multiple choice, order matters.
   Built-in workers include:
+  - `-w row2obj` (object mode) converts incoming arrays to objects with properties described in first entry (header)
+  - `-w aggregate` aggregates input up until an (optional) threshhold. A call without parameters will aggregate input until source runs out then pass it to next worker. Invoking `-w aggregate:4` will split input into a stream of arrays of length 4.
+  - `-w toJSON` useful for switching from object mode
   - `-w gzip`, which maps to `require('node:zlib').createGzip()`
   - `-w slow [(N,n-N)]` that slows down throughput by specified N of ms using `setTimeout`
 - `<source> [target]` - If only one option is given it is considered to be the source.
