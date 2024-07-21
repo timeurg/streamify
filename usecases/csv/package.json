@@ -1,0 +1,16 @@
+{
+  "name": "node-streamify-csv2obj",
+  "version": "1.0.0",
+  "description": "Streamify adaptation of https://csv.js.org/parse/api/stream/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "timeurg@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "replicate": "^0.31.1",
+    "stream-transform": "^3.3.2"
+  }
+}
