@@ -4,6 +4,7 @@
   "description": "Streamify adaptation of https://csv.js.org/parse/api/stream/",
   "main": "index.js",
   "scripts": {
+    "song": "streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "timeurg@gmail.com",

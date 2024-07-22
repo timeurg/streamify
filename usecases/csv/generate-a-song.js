@@ -1,6 +1,4 @@
 const { Transform } = require('node:stream');
-
-
 class GenerateSong extends Transform {
     constructor(opts, logger,) {
         super({ ...opts, objectMode: true, readableObjectMode: true, writeableObjectMode: true });

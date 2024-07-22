@@ -1,0 +1,11 @@
+Dreadful Pop in C major with chords that go roughly like this:
+
+C,G,Am,F
+C,G,Am,F
+C,G,Am,F
+C,G,Dm,G
+
+C,Am,Dm,G
+C,Am,Dm,G
+C,Am,Am,G
+C,G,Dm,G

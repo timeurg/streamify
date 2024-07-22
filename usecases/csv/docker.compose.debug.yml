@@ -20,7 +20,7 @@ services:
       "start:debug", 
       "--", "--", 
       "../temp/chord-progressions.csv", 
-      "-m csv-parse:parse:(delimiter=,)", # we're using https://csv.js.org/parse/examples/stream_pipe/
+      "-from csv-parse:parse:(delimiter=,)", # we're using https://csv.js.org/parse/examples/stream_pipe/
       "-w row2obj",
       "-w aggregate",
       "-m generate-a-song",
