@@ -4,6 +4,8 @@
 Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC. 
 The project emphasizes efficient handling of large data volumes and includes Docker support for easy deployment.
 
+See example of configuring a [microservice that generates a song from csv file](./usecases/csv/README.md).
+
 # Installation
 
 `npm i -g node-streamify` then call `streamify` from command line

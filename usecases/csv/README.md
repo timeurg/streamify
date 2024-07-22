@@ -1,12 +1,16 @@
 # Building a song generation service from a csv file
 
-Try it out in your terminal:
+Try it out in [Docker](./docker.compose.yml) or in your terminal:
 
 `npm i -g node-streamify csv-parse`
 
 `cd usecases/csv`
 
 `NODE_PATH=$(npm root --quiet -g):$(pwd) streamify ./data/chord-progressions.csv ./data/my-result.json -w from:csv-parse:parse row2obj aggregate from:generate-a-song toJSON`
+
+![csv-2-song](./../../docs/assets/csv-2-song.jpg)
+
+## Explanation
 
 While searching for a csv to use as an example I came across a [dataset of chord progressions](./data/chord-progressions.csv).
 
