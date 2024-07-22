@@ -1,14 +1,22 @@
 # Building a song generation service from a csv file
 
+Try it out in your terminal:
+
+`npm i -g node-streamify csv-parse`
+
+`cd usecases/csv`
+
+`NODE_PATH=$(npm root --quiet -g):$(pwd) streamify ./data/chord-progressions.csv ./data/my-result.json -w from:csv-parse:parse row2obj aggregate from:generate-a-song toJSON`
+
 While searching for a csv to use as an example I came across a [dataset of chord progressions](./data/chord-progressions.csv).
 
 It has descriptions like 'Moody', 'Catchy' mixed with genres like 'Flamenco' and 'Grunge', which practically begs for a song-generating app.
 
 Using `streamify` we already got it, just write our app logic in a [generate-a-song.js](./generate-a-song.js) file and you got yourself a one-command configurable microservice:
 
-Call `streamify`.
+Call `streamify`. We're going to import global packages (`npm root` part) and a script from `pwd`, so we add these to `NODE_PATH`.
 
-`streamify --verbose \`
+`NODE_PATH=$(npm root --quiet -g):$(pwd) streamify --verbose \` 
 
 Pass our csv as `streamify` source. Some time later we might want to replace it with an AI-generation web service and will be able to do so with ease.
 

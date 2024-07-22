@@ -32,6 +32,7 @@ export class FileProtocolAdaptor implements OnModuleDestroy, ProtocolAdaptor {
         this.logger.verbose(`Writing to ${filename}`);
         this.fileHandle = await fs.open(filename, 'w');
         this.stream = this.fileHandle.createWriteStream();
+        this.stream.on('finish', () => this.logger.verbose(`Saved to ${filename}`))
         return;
       default:
         break;

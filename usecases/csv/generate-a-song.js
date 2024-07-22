@@ -2,17 +2,21 @@ const { Transform } = require('node:stream');
 class GenerateSong extends Transform {
     constructor(opts, logger,) {
         super({ ...opts, objectMode: true, readableObjectMode: true, writeableObjectMode: true });
-        this.logger = logger;
+        this.logger = logger || Object.assign(console, {
+            verbose: console.log.bind(console)
+        });
+        this.logger.verbose(`Starting song generation service`);
     }
     _transform(
         chord_progressions,
         encoding,
         callback,
     ) {
+        this.logger.verbose(`Got dictionary of ${chord_progressions.length} entries`);
         const random_progression = () => {
             const i = Math.floor(Math.random() * chord_progressions.length);
             const result = chord_progressions[i];
-            console.log('got', result["Progression Quality"], 'at', i)
+            this.logger.verbose('got', result["Progression Quality"], 'at', i)
             return Object.assign(result)
         }
         const mutations = [];
@@ -63,7 +67,7 @@ class GenerateSong extends Transform {
             "G major": ["G", "A", "B", "C", "D", "E", "F"]
         }
         const scale = Object.keys(scales)[Math.floor(Math.random() * Object.keys(scales).length)];
-        console.log('scale', scale)
+        this.logger.verbose('scale', scale)
         songname = `${songname} in ${scale}`;
         lines = lines.map(line => line.map(i => scales[scale][+i - 1]))
             .map((v, i, a) => (i % 4 == 0) ? [a[i], a[i + 1], a[i + 2], a[i + 3]].filter(i => i) : undefined)

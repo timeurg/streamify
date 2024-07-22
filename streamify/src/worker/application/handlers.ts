@@ -17,7 +17,7 @@ export class GetWorkerCommandHandler
     const options: CreateWorkerOptions = {
       ...command,
     };
-    const worker = this.factory.get(options);
+    const worker = await this.factory.get(options);
     worker.connect();
   }
 }
@@ -29,7 +29,8 @@ export class AssignStreamCommandHandler
   @Inject() private readonly factory: WorkerFactory;
 
   async execute(command: AssignStreamCommand): Promise<void> {
-    this.factory.get().setStream(command.dataBus.mode, command.stream);
+    const worker = await this.factory.get();
+    worker.setStream(command.dataBus.mode, command.stream);
   }
 }
 

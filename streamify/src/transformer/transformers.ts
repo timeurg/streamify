@@ -6,9 +6,10 @@ export enum InjectionToken {
 
 
 export enum TransformerErrors {
-  UNKNOWN_CALL_STRING = 'Input [%s] does not match any known workers'
+  UNKNOWN_CALL_STRING = 'Input [%s] does not match any known transformers',
+  RESULT_INCOMPATIBLE = 'Module import [%s] does not seem to return any transformer streams',
 }
 
 export interface TransformerFactory {
-  create(description: string): Transform;
+  create(description: string): Promise<Transform>;
 }

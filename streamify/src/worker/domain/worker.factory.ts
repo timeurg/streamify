@@ -15,20 +15,20 @@ export class WorkerFactory {
   @Inject() private logger: Logger;
   @Inject(InjectionToken.Tranformer_FACTORY) private transformerFactory: TransformerFactory;
 
-  private instance: Worker;
+  private instance: Promise<Worker>;
 
-  get(options?: CreateWorkerOptions): Worker {
+  async get(options?: CreateWorkerOptions): Promise<Worker> {
     if (!this.instance) {
       this.instance = this.create(options);
     }
     return this.instance;
   }
 
-  private create(createOptions: CreateWorkerOptions): Worker {
+  private async create(createOptions: CreateWorkerOptions): Promise<Worker> {
     const { input, output } = createOptions;
-    const workload = createOptions.workload.map((code) =>
+    const workload = await Promise.all(createOptions.workload.map((code) =>
       this.transformerFactory.create(code),
-    );
+    ));
     return this.eventPublisher.mergeObjectContext(
       new WorkerImplement(
         {

@@ -1,0 +1,21 @@
+name: 'streamify-song-from-csv'
+
+services:
+  song-generator:
+    image: streamify:latest
+    volumes:
+      - .:/home/node/song-generator
+      - ./data:/home/node/data
+    environment:
+      NODE_PATH: '/home/node/song-generator/node_modules:/home/node/song-generator'
+    network_mode: host
+    command: [
+      "../data/chord-progressions.csv", 
+      "-w from:csv-parse:parse:(delimiter=,)", # we're using https://csv.js.org/parse/examples/stream_pipe/
+      "-w row2obj aggregate",
+      "-w from:generate-a-song",
+      "-w extract:prompt",
+      #"some AI song-generation api target pipeline",
+      "../data/last-prompt.txt", 
+      "--verbose"
+      ]
