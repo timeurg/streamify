@@ -45,7 +45,7 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
       - or `NATS_OUT_HWM=800 streamify temp/sample.txt nats:4222/file-transfer -w slow:100-5000 --verbose` if you have streamify globally installed
     - check file integrity when transfer is complete: `md5sum temp/sample.txt temp/copy-over-nats.txt`
     - add `-w gzip` and check if resulting file is a valid zip
-- a [song-generation](./usecases//csv/generate-a-song.js) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt`.
+- a [song-generation](./usecases//csv/README.md) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt`.
 - homemade `cp`: 
   - `streamify FILE COPY`
   - `docker run --rm -v ${PWD}/temp:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
