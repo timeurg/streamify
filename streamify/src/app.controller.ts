@@ -55,7 +55,12 @@ export class AppDefaultCommand extends CommandRunner {
     description: 'Specify workload',
   })
   parseOptions(option: string, optionsAccumulator: string[] = []): string[] {
-    optionsAccumulator.push(option.trim());
+    const workload = option.trim();
+    if (workload.indexOf(' ') !== -1) {
+      workload.split(' ').map(i => optionsAccumulator.push(i))
+    } else {
+      optionsAccumulator.push(workload);
+    }
     return optionsAccumulator;
   }
 }
