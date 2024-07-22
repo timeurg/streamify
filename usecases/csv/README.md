@@ -18,11 +18,13 @@ It has descriptions like 'Moody', 'Catchy' mixed with genres like 'Flamenco' and
 
 Using `streamify` we already got it, just write our app logic in a [generate-a-song.js](./generate-a-song.js) file and you got yourself a one-command configurable microservice:
 
+## Step-by-step
+
 Call `streamify`. We're going to import global packages (`npm root` part) and a script from `pwd`, so we add these to `NODE_PATH`.
 
 `NODE_PATH=$(npm root --quiet -g):$(pwd) streamify --verbose \` 
 
-Pass our csv as `streamify` source. Some time later we might want to replace it with an AI-generation web service and will be able to do so with ease.
+Pass our csv file as `streamify` source. Some time later we might want to replace it with an AI-generation web service and will be able to do so with ease.
 
 `./data/chord-progressions.csv \` 
 
