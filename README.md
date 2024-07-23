@@ -1,18 +1,22 @@
 # Streamify
 
-`streamify` utilises Node Streams and Transformers to build versatile microservice application infrastructures designed for efficient data transfer and processing, utilising pipe-n-filters design approach. 
-Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC. 
-The project emphasizes efficient handling of large data volumes and includes Docker support for easy deployment.
+`streamify` is a microframework for designing microservices in an input->transform->output fashion. It can be used as a global application or a Docker image and the neat thing is that entire pipelines and any of their parts can be easily reused, modified and shared.
+
+`streamify` harnesses the power of native Node Streams and Transformers to build services with well-defined and configurable throughput. Read about [highwatermark](https://nodejs.org/api/stream.html#streamgetdefaulthighwatermarkobjectmode) and [backpressure](https://nodejs.org/en/learn/modules/backpressuring-in-streams) concepts to get maximum value from this rendition of Pipes&Filters design pattern.
+
+Initially demonstrated with NATS for inter-service communication, the project's architecture allows for scalability and integration with various transport systems like PostgreSQL, Kafka, and gRPC.
 
 See example of configuring a [microservice that generates a song from csv file](./usecases/csv/README.md).
 
 # Installation
 
-`npm i -g node-streamify` then call `streamify` from command line
+`npm i -g node-streamify` then call `streamify` from command line.
+
+Check `streamify FILENAME COPY`, which should work just like `cp` or `copy` to see if it works.
 
 If you have NATS up and running (listening on, say, port 4222) try `streamify FILENAME nats:4222/unique_topic` to make a file available for download.
 
-You can then download it using `streamify nats:4222/unique_topic copy.txt`, on another machine or terminal window, wherever NATS instance is available, using a configuration file with authorization credentials for example.
+You can then download it using `streamify nats:4222/unique_topic copy.txt`, on another machine or terminal window, wherever NATS instance is available, using a configuration file with authorization credentials if you so please.
 
 # Usage
 
@@ -24,12 +28,13 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
   - `docker run --rm IMAGE` if you have a docker image configured
 - `-w --worker` a (chain of) workload(s) implementing `{ Transform } from 'node:stream'` interface. Optional, multiple choice, order matters.
   Built-in workers include:
-  - `-w row2obj` (object mode) converts incoming arrays to objects with properties described in first entry (header)
-  - `-w extract:PROPERTY` (object mode) passes specified property to next worker
-  - `-w aggregate` aggregates input up until an (optional) threshhold. A call without parameters will aggregate input until source runs out then pass it to next worker. Invoking `-w aggregate:4` will split input into a stream of arrays of length 4.
-  - `-w toJSON` useful for switching from object mode
-  - `-w gzip`, which maps to `require('node:zlib').createGzip()`
-  - `-w slow [(N,n-N)]` that slows down throughput by specified N of ms using `setTimeout`
+  - `-w from:PACKAGE:EXPORTED` or `-w from:FILENAME`: custom workers syntax, see [command](./usecases/csv/run.sh) and [docker](./usecases/csv/docker.compose.yml) usage examples
+  - `-w row2obj`: (object mode) converts incoming arrays to objects with properties described in first entry (header)
+  - `-w aggregate`: aggregates input up until an (optional) threshhold. A call without parameters will aggregate input until source runs out then pass it to next worker. Invoking `-w aggregate:4` will split input into a stream of arrays of length 4.
+  - `-w extract:PROPERTY`: (object mode) passes specified property to next worker
+  - `-w toJSON`: useful for switching from object mode
+  - `-w gzip`: maps to `require('node:zlib').createGzip()`
+  - `-w slow [(N,n-N)]`: slows down execution by specified N of ms using `setTimeout`
 - `<source> [target]` - If only one option is given it is considered to be the source.
   The syntax is `PROTOCOL:OPTIONS`. If the no colon is present protocol defaults to `file`, empty value defaults to `std` (stdin for source, stdout for target).
   Built-in protocols are:
@@ -38,7 +43,8 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
     - `docker compose -f "./usecases/nats/docker.compose.yml" up -d --build` to see [example](./usecases/nats/docker.compose.yml)
 
 ## Examples
-- file tranfer and transform via NATS
+- a [song-generation](./usecases//csv/README.md) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt`.
+- [file tranfer and transform via NATS](./usecases/nats/docker.compose.yml)
   - `docker compose -f "./usecases/nats/docker.compose.yml" up -d --build`
   - playground:
     - up Writer & NATS `docker compose -f "docker.compose.yml" up writer nats`
@@ -47,7 +53,6 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
       - or `NATS_OUT_HWM=800 streamify temp/sample.txt nats:4222/file-transfer -w slow:100-5000 --verbose` if you have streamify globally installed
     - check file integrity when transfer is complete: `md5sum temp/sample.txt temp/copy-over-nats.txt`
     - add `-w gzip` and check if resulting file is a valid zip
-- a [song-generation](./usecases//csv/README.md) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt`.
 - homemade `cp`: 
   - `streamify FILE COPY`
   - `docker run --rm -v ${PWD}/temp:/home/node/temp reader ../temp/sample.txt ../temp/copy2.txt`
