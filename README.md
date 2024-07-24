@@ -43,7 +43,7 @@ You can then download it using `streamify nats:4222/unique_topic copy.txt`, on a
     - `docker compose -f "./usecases/nats/docker.compose.yml" up -d --build` to see [example](./usecases/nats/docker.compose.yml)
 
 ## Examples
-- a [song-generation](./usecases//csv/README.md) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse:(delimiter=,) -w row2obj -w aggregate -m generate-a-song -w extract:prompt ../temp/last-prompt.txt`.
+- a [song-generation](./usecases//csv/README.md) prompt microservice one liner: `streamify --verbose ./temp/chord-progressions.csv -w from:csv-parse:parse row2obj aggregate generate-a-song extract:prompt ../temp/last-prompt.txt`.
 - [file tranfer and transform via NATS](./usecases/nats/docker.compose.yml)
   - `docker compose -f "./usecases/nats/docker.compose.yml" up -d --build`
   - playground:
