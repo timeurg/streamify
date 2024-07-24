@@ -44,7 +44,7 @@ Write our song-generating logic into [generate-a-song.js](./generate-a-song.js) 
 
 `-w generate-a-song \` 
 
-This worker will output a sing in a `{songname: string, prompt: string, lines: Chord[4][1,4][]}` object for next workers in line to transform. 
+This worker will output a song in a `{songname: string, prompt: string, lines: Chord[4][1,4][]}` object for next workers in line to transform. 
 
 Here, for example, we extract `prompt` property of our song and save it to a [file](./data/Wistful-Grunge-in-A-minor.json) (`streamify` destination) to use it for AI-generation later.
 
@@ -52,4 +52,5 @@ Here, for example, we extract `prompt` property of our song and save it to a [fi
 
 Now that I think of it, prompt generation should've rather been a pipeline step of its own... 
 Furthermore, the song generation part could be split into well-defined steps, like `pick-genre`, `pick-mutation`, `apply-mutation`, `verse`, `chorus`, etc.
-Well, good enough for an example, designed to illustrate using csv as source.
+
+Well, good enough for an example designed to illustrate using csv as a `streamify` source.
