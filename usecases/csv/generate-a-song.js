@@ -17,7 +17,7 @@ class GenerateSong extends Transform {
             const i = Math.floor(Math.random() * chord_progressions.length);
             const result = chord_progressions[i];
             this.logger.verbose('got', result["Progression Quality"], 'at', i)
-            return Object.assign(result)
+            return Object.assign({}, result)
         }
         const mutations = [];
         let genre = {};
